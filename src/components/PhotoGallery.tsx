@@ -11,7 +11,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
   }
 
   return (
-    <section id="photos" className="scroll-mt-24">
+    <section id="photos" className="scroll-mt-20">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-semibold tracking-tight text-slate-900">
           Photo Gallery

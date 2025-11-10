@@ -8,7 +8,7 @@ export function PropertyDetails({ details }: PropertyDetailsProps) {
   return (
     <section
       id="details"
-      className="scroll-mt-24 rounded-3xl bg-slate-900 text-slate-100"
+      className="scroll-mt-20 rounded-3xl bg-slate-900 text-slate-100"
     >
       <div className="grid gap-8 p-10 md:grid-cols-[1.2fr_1fr] md:gap-16 md:p-14">
         <div>

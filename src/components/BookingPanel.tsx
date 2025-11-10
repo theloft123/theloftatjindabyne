@@ -10,7 +10,7 @@ import {
   isWithinInterval,
   parseISO,
 } from "date-fns";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
 import { useAccess } from "@/context/AccessContext";
 import type { SiteContent } from "@/lib/siteContent";
@@ -65,6 +65,16 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
     childrenUnder12: 0,
   });
   const [showGuestForm, setShowGuestForm] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const breakdown = useMemo(() => {
     if (!range?.from || !range?.to) {
@@ -177,7 +187,7 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
   return (
     <section
       id="availability"
-      className="scroll-mt-24 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10"
+      className="scroll-mt-20 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm md:p-10"
     >
       <div className="flex flex-col gap-6 md:flex-row md:items-start">
         <div className="md:max-w-sm">
@@ -199,10 +209,10 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
           </ul>
         </div>
         <div className="flex-1 space-y-6">
-          <div className="rounded-3xl border border-slate-200 p-6 shadow-inner bg-white">
+          <div className="rounded-3xl border border-slate-200 p-4 md:p-6 shadow-inner bg-white overflow-x-auto">
             <DayPicker
               mode="range"
-              numberOfMonths={2}
+              numberOfMonths={isMobile ? 1 : 2}
               selected={range}
               onSelect={setRange}
               disabled={disabledDays}

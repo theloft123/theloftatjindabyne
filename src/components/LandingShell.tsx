@@ -8,10 +8,12 @@ import { PropertyDetails } from "@/components/PropertyDetails";
 import { TermsAndRules } from "@/components/TermsAndRules";
 import { useAccess } from "@/context/AccessContext";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { useState } from "react";
 
 export function LandingShell() {
   const { content, loading, error } = useSiteContent();
   const { role, clearAccess } = useAccess();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   if (loading) {
     return (
@@ -38,39 +40,112 @@ export function LandingShell() {
 
   return (
     <div className="min-h-screen bg-slate-100">
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 py-16 md:px-10 md:py-20 lg:gap-20">
-        <header className="flex items-center justify-between rounded-full border border-slate-200 bg-white/70 px-6 py-4 shadow-sm backdrop-blur">
-          <div>
-            <p className="text-xs uppercase tracking-[0.35em] text-slate-500">
-              Jindabyne, NSW
-            </p>
-            <h1 className="text-xl font-semibold text-slate-900">
-              The Loft @ Jindabyne
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <nav className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 md:flex">
-              <a href="#details" className="hover:text-slate-900">
+      {/* Sticky Navigation Bar */}
+      <nav className="sticky top-0 z-50 border-b border-slate-200 bg-white/95 backdrop-blur-md shadow-sm">
+        <div className="mx-auto max-w-6xl px-4 md:px-6">
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center gap-6">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.35em] text-slate-500">
+                  Jindabyne, NSW
+                </p>
+                <h1 className="text-sm md:text-base font-semibold text-slate-900">
+                  The Loft @ Jindabyne
+                </h1>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden md:flex items-center gap-3">
+              <a
+                href="#details"
+                className="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              >
                 Details
               </a>
-              <a href="#photos" className="hover:text-slate-900">
+              <a
+                href="#photos"
+                className="rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              >
                 Photos
               </a>
-              <a href="#terms" className="hover:text-slate-900">
-                Terms
+              <a
+                href="#availability"
+                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+              >
+                Book
               </a>
-              <a href="#availability" className="hover:text-slate-900">
-                Availability
-              </a>
-            </nav>
+              <button
+                onClick={clearAccess}
+                className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Logout
+              </button>
+            </div>
+
+            {/* Mobile Hamburger Button */}
             <button
-              onClick={clearAccess}
-              className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden rounded-lg p-2 text-slate-600 hover:bg-slate-100"
+              aria-label="Toggle menu"
             >
-              Logout
+              <svg
+                className="h-6 w-6"
+                fill="none"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                {mobileMenuOpen ? (
+                  <path d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
             </button>
           </div>
-        </header>
+
+          {/* Mobile Dropdown Menu */}
+          {mobileMenuOpen && (
+            <div className="md:hidden border-t border-slate-200 py-4 space-y-2">
+              <a
+                href="#details"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              >
+                Details
+              </a>
+              <a
+                href="#photos"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+              >
+                Photos
+              </a>
+              <a
+                href="#availability"
+                onClick={() => setMobileMenuOpen(false)}
+                className="block rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+              >
+                Book Now
+              </a>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  clearAccess();
+                }}
+                className="w-full text-left rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+              >
+                Logout
+              </button>
+            </div>
+          )}
+        </div>
+      </nav>
+
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 py-8 md:px-10 md:py-20 lg:gap-20">
         {role === "admin" && (
           <div className="rounded-3xl border border-sky-200 bg-sky-50 px-6 py-4 text-sky-700">
             <p className="text-sm font-semibold">Admin mode enabled.</p>

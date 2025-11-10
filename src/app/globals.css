@@ -22,6 +22,10 @@
   --color-sky-300: #7dd3fc;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

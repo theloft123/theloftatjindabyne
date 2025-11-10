@@ -2,7 +2,7 @@ export function TermsAndRules() {
   return (
     <section
       id="terms"
-      className="scroll-mt-24 rounded-3xl bg-white shadow-sm"
+      className="scroll-mt-20 rounded-3xl bg-white shadow-sm"
     >
       <div className="p-10 md:p-14">
         <div className="mb-8">
