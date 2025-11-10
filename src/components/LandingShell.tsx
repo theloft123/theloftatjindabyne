@@ -113,21 +113,21 @@ export function LandingShell() {
               <a
                 href="#details"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="block rounded-lg px-4 py-3 text-base font-semibold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
               >
                 Details
               </a>
               <a
                 href="#photos"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="block rounded-lg px-4 py-3 text-base font-semibold uppercase tracking-[0.2em] text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
               >
                 Photos
               </a>
               <a
                 href="#availability"
                 onClick={() => setMobileMenuOpen(false)}
-                className="block rounded-lg bg-slate-900 px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+                className="block rounded-lg bg-sky-500 px-4 py-3.5 text-base font-bold uppercase tracking-[0.2em] text-slate-900 transition hover:bg-sky-400"
               >
                 Book Now
               </a>
@@ -136,7 +136,7 @@ export function LandingShell() {
                   setMobileMenuOpen(false);
                   clearAccess();
                 }}
-                className="w-full text-left rounded-lg border border-slate-300 bg-white px-4 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+                className="w-full text-left rounded-lg border-2 border-slate-300 bg-white px-4 py-3 text-base font-semibold uppercase tracking-[0.2em] text-slate-700 transition hover:border-slate-400 hover:bg-slate-50"
               >
                 Logout
               </button>
