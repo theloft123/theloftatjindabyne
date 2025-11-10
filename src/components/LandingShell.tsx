@@ -71,9 +71,9 @@ export function LandingShell() {
               </a>
               <a
                 href="#availability"
-                className="rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+                className="rounded-full bg-sky-500 px-4 py-2 text-xs font-bold uppercase tracking-[0.3em] text-slate-900 transition hover:bg-sky-400"
               >
-                Book
+                Book Now
               </a>
               <button
                 onClick={clearAccess}

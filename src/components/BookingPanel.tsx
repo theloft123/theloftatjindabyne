@@ -180,7 +180,7 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
 
     return [
       { before: startOfToday() },
-      ...blocked.map((date) => ({ date })),
+      ...blocked,
     ];
   }, [bookings.blockedDates]);
 

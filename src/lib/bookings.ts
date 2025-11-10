@@ -30,7 +30,7 @@ export async function checkDateAvailability(
   const content = await getSiteContent();
   const activeStatuses: BookingStatus[] = ["pending", "confirmed", "completed"];
 
-  const conflicting = content.reservations.filter((reservation) => {
+  const conflicting = content.reservations.filter((reservation: Reservation) => {
     if (excludeReservationId && reservation.id === excludeReservationId) {
       return false;
     }
@@ -100,7 +100,7 @@ export async function createBooking(input: CreateBookingInput): Promise<Reservat
 export async function getAllBookings(): Promise<Reservation[]> {
   const content = await getSiteContent();
   return [...content.reservations].sort(
-    (a, b) => a.check_in_date.localeCompare(b.check_in_date)
+    (a: Reservation, b: Reservation) => a.check_in_date.localeCompare(b.check_in_date)
   );
 }
 
@@ -115,7 +115,7 @@ export async function getBookingsInRange(
   const activeStatuses: BookingStatus[] = ["pending", "confirmed", "completed"];
 
   return content.reservations
-    .filter((reservation) => {
+    .filter((reservation: Reservation) => {
       if (!activeStatuses.includes(reservation.status)) {
         return false;
       }
@@ -124,7 +124,7 @@ export async function getBookingsInRange(
         reservation.check_out_date >= startDate
       );
     })
-    .sort((a, b) => a.check_in_date.localeCompare(b.check_in_date));
+    .sort((a: Reservation, b: Reservation) => a.check_in_date.localeCompare(b.check_in_date));
 }
 
 /**

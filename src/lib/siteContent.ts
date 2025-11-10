@@ -143,7 +143,7 @@ const defaultContent: SiteContent = {
     highlights: [
       {
         title: "Sleeps",
-        highlight: "Up to 9 guests",
+        highlight: "Up to 8 guests",
         description:
           "Bedroom 1: Queen • Bedroom 2 (Bunk Room): 1 x Double and 3 x Singles • Loft front: Queen • Loft back: 2 x Singles",
       },
