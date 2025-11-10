@@ -66,6 +66,9 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
   });
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  // Store input values as strings to allow proper editing/backspace
+  const [adultsInput, setAdultsInput] = useState("2");
+  const [childrenInput, setChildrenInput] = useState("0");
 
   useEffect(() => {
     const checkMobile = () => {
@@ -308,19 +311,26 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                               min="1"
                               max={bookings.occupancyPricing.maxOccupancy}
                               required
-                              value={guestDetails.adults}
+                              value={adultsInput}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                if (value === '') return; // Allow empty temporarily while typing
+                                setAdultsInput(value); // Always update display value
+                                
+                                // Parse and validate for calculations
                                 const adults = parseInt(value, 10);
-                                if (isNaN(adults)) return;
-                                const clampedAdults = Math.max(1, Math.min(adults, bookings.occupancyPricing!.maxOccupancy));
-                                setGuestDetails({...guestDetails, adults: clampedAdults});
+                                if (!isNaN(adults) && adults >= 1) {
+                                  const clampedAdults = Math.min(adults, bookings.occupancyPricing!.maxOccupancy);
+                                  setGuestDetails({...guestDetails, adults: clampedAdults});
+                                }
                               }}
                               onBlur={(e) => {
                                 // On blur, ensure we have a valid value
-                                if (e.target.value === '' || parseInt(e.target.value, 10) < 1) {
+                                const adults = parseInt(e.target.value, 10);
+                                if (isNaN(adults) || adults < 1) {
+                                  setAdultsInput("1");
                                   setGuestDetails({...guestDetails, adults: 1});
+                                } else {
+                                  setAdultsInput(guestDetails.adults.toString());
                                 }
                               }}
                               className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
@@ -335,20 +345,27 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                               min="0"
                               max={bookings.occupancyPricing.maxOccupancy - 1}
                               required
-                              value={guestDetails.childrenUnder12}
+                              value={childrenInput}
                               onChange={(e) => {
                                 const value = e.target.value;
-                                if (value === '') return; // Allow empty temporarily while typing
+                                setChildrenInput(value); // Always update display value
+                                
+                                // Parse and validate for calculations
                                 const children = parseInt(value, 10);
-                                if (isNaN(children)) return;
-                                const maxChildren = bookings.occupancyPricing!.maxOccupancy - 1;
-                                const clampedChildren = Math.max(0, Math.min(children, maxChildren));
-                                setGuestDetails({...guestDetails, childrenUnder12: clampedChildren});
+                                if (!isNaN(children) && children >= 0) {
+                                  const maxChildren = bookings.occupancyPricing!.maxOccupancy - 1;
+                                  const clampedChildren = Math.min(children, maxChildren);
+                                  setGuestDetails({...guestDetails, childrenUnder12: clampedChildren});
+                                }
                               }}
                               onBlur={(e) => {
                                 // On blur, ensure we have a valid value
-                                if (e.target.value === '' || parseInt(e.target.value, 10) < 0) {
+                                const children = parseInt(e.target.value, 10);
+                                if (isNaN(children) || children < 0) {
+                                  setChildrenInput("0");
                                   setGuestDetails({...guestDetails, childrenUnder12: 0});
+                                } else {
+                                  setChildrenInput(guestDetails.childrenUnder12.toString());
                                 }
                               }}
                               className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
