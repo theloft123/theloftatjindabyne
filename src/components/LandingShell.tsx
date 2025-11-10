@@ -5,6 +5,7 @@ import { BookingPanel } from "@/components/BookingPanel";
 import { Hero } from "@/components/Hero";
 import { PhotoGallery } from "@/components/PhotoGallery";
 import { PropertyDetails } from "@/components/PropertyDetails";
+import { TermsAndRules } from "@/components/TermsAndRules";
 import { useAccess } from "@/context/AccessContext";
 import { useSiteContent } from "@/context/SiteContentContext";
 
@@ -44,7 +45,7 @@ export function LandingShell() {
               Jindabyne, NSW
             </p>
             <h1 className="text-xl font-semibold text-slate-900">
-              The Loft at Jindabyne
+              The Loft @ Jindabyne
             </h1>
           </div>
           <div className="flex items-center gap-4">
@@ -54,6 +55,9 @@ export function LandingShell() {
               </a>
               <a href="#photos" className="hover:text-slate-900">
                 Photos
+              </a>
+              <a href="#terms" className="hover:text-slate-900">
+                Terms
               </a>
               <a href="#availability" className="hover:text-slate-900">
                 Availability
@@ -79,21 +83,27 @@ export function LandingShell() {
           <Hero hero={content.hero} details={content.details} />
           <PhotoGallery photos={content.gallery} />
           <PropertyDetails details={content.details} />
+          <TermsAndRules />
           <BookingPanel bookings={content.bookings} />
         </main>
         <footer className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-sm text-slate-500 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <p>
-              © {new Date().getFullYear()} The Loft at Jindabyne. All rights reserved.
+              © {new Date().getFullYear()} The Loft @ Jindabyne. All rights reserved.
             </p>
             <div className="flex flex-wrap items-center gap-4">
               <a
-                href="mailto:stay@theloftjindabyne.com"
+                href="mailto:jack.francis.aus@gmail.com"
                 className="font-semibold text-slate-700 hover:text-slate-900"
               >
-                stay@theloftjindabyne.com
+                jack.francis.aus@gmail.com
               </a>
-              <span>ABN 00 000 000 000</span>
+              <a
+                href="tel:+61497162289"
+                className="font-semibold text-slate-700 hover:text-slate-900"
+              >
+                +61 497 162 289
+              </a>
             </div>
           </div>
         </footer>

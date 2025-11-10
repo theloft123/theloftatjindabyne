@@ -1,6 +1,6 @@
-## The Loft at Jindabyne
+## The Loft @ Jindabyne
 
-A password-protected rental property microsite showcasing availability, pricing, photo gallery, and property highlights for The Loft at Jindabyne.
+A password-protected rental property microsite showcasing availability, pricing, photo gallery, and property highlights for The Loft @ Jindabyne.
 
 ### Features
 - Password gate for guest-only access (stores successful unlocks in `localStorage`)

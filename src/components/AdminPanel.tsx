@@ -119,10 +119,10 @@ export function AdminPanel() {
 
   return (
     <aside className="space-y-6">
-      <div className={`${SECTION_CLASS} border-slate-900 bg-slate-900 text-white`}>
+      <div className="rounded-3xl border border-slate-900 bg-slate-900 p-6 text-white shadow-sm">
         <div className="flex flex-col gap-2">
           <h2 className="text-lg font-semibold">Admin control room</h2>
-          <p className="text-sm text-slate-200">
+          <p className="text-sm text-slate-300">
             You are viewing the site in admin mode. Updates are saved to Supabase and visible to guests immediately.
           </p>
           <div className="flex flex-wrap items-center gap-3 pt-2">
@@ -395,77 +395,77 @@ export function AdminPanel() {
                 <NumberField
                   label="Monday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.monday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.monday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, monday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), monday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Tuesday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.tuesday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.tuesday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, tuesday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), tuesday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Wednesday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.wednesday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.wednesday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, wednesday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), wednesday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Thursday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.thursday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.thursday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, thursday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), thursday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Friday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.friday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.friday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, friday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), friday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Saturday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.saturday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.saturday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, saturday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), saturday: value > 0 ? value : undefined },
                     })
                   }
                 />
                 <NumberField
                   label="Sunday"
                   suffix="AUD"
-                  value={draft.bookings.dayOfWeekRates.sunday ?? 0}
+                  value={draft.bookings.dayOfWeekRates?.sunday ?? 0}
                   onChange={(value) =>
                     handleContentChange("bookings", {
                       ...draft.bookings,
-                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, sunday: value > 0 ? value : undefined },
+                      dayOfWeekRates: { ...(draft.bookings.dayOfWeekRates || {}), sunday: value > 0 ? value : undefined },
                     })
                   }
                 />
@@ -482,7 +482,7 @@ export function AdminPanel() {
                 className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3"
                 rows={6}
                 placeholder="2025-12-20 to 2026-01-10 | 750 | Christmas/New Year Peak"
-                value={formatCustomRates(draft.bookings.customRates)}
+                value={formatCustomRates(draft.bookings.customRates || [])}
                 onChange={(event) =>
                   handleContentChange("bookings", {
                     ...draft.bookings,
@@ -510,6 +510,109 @@ export function AdminPanel() {
                 }
               />
             </div>
+          </div>
+        </section>
+      )}
+
+      {draft && (
+        <section className={SECTION_CLASS}>
+          <h3 className="text-base font-semibold text-slate-900">Occupancy-based pricing (optional)</h3>
+          <p className="mt-2 text-sm text-slate-500">
+            Charge additional fees for extra adults (12+). Children under 12 are counted but not charged.
+          </p>
+          <div className="mt-4 space-y-4">
+            <div className="flex items-center gap-3">
+              <input
+                type="checkbox"
+                id="occupancy-enabled"
+                checked={draft.bookings.occupancyPricing?.enabled ?? false}
+                onChange={(e) =>
+                  handleContentChange("bookings", {
+                    ...draft.bookings,
+                    occupancyPricing: {
+                      ...(draft.bookings.occupancyPricing || {
+                        baseOccupancy: 2,
+                        maxOccupancy: 8,
+                        perAdultRate: 50,
+                        description: "Base rate includes 2 guests. Additional adults (12+) charged per night.",
+                      }),
+                      enabled: e.target.checked,
+                    },
+                  })
+                }
+                className="h-5 w-5 rounded border-slate-300"
+              />
+              <label htmlFor="occupancy-enabled" className="text-sm font-medium text-slate-700">
+                Enable occupancy-based pricing
+              </label>
+            </div>
+            
+            {draft.bookings.occupancyPricing?.enabled && (
+              <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <div className="grid gap-4 md:grid-cols-3">
+                  <NumberField
+                    label="Base occupancy"
+                    value={draft.bookings.occupancyPricing.baseOccupancy}
+                    onChange={(value) =>
+                      handleContentChange("bookings", {
+                        ...draft.bookings,
+                        occupancyPricing: {
+                          ...draft.bookings.occupancyPricing!,
+                          baseOccupancy: value,
+                        },
+                      })
+                    }
+                  />
+                  <NumberField
+                    label="Maximum occupancy"
+                    value={draft.bookings.occupancyPricing.maxOccupancy}
+                    onChange={(value) =>
+                      handleContentChange("bookings", {
+                        ...draft.bookings,
+                        occupancyPricing: {
+                          ...draft.bookings.occupancyPricing!,
+                          maxOccupancy: value,
+                        },
+                      })
+                    }
+                  />
+                  <NumberField
+                    label="Per extra adult (12+)"
+                    suffix="AUD/night"
+                    value={draft.bookings.occupancyPricing.perAdultRate}
+                    onChange={(value) =>
+                      handleContentChange("bookings", {
+                        ...draft.bookings,
+                        occupancyPricing: {
+                          ...draft.bookings.occupancyPricing!,
+                          perAdultRate: value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                    Description for guests
+                  </label>
+                  <textarea
+                    className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                    rows={2}
+                    placeholder="Base rate includes 2 guests. Additional adults (12+) charged per night."
+                    value={draft.bookings.occupancyPricing.description || ""}
+                    onChange={(e) =>
+                      handleContentChange("bookings", {
+                        ...draft.bookings,
+                        occupancyPricing: {
+                          ...draft.bookings.occupancyPricing!,
+                          description: e.target.value,
+                        },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}

@@ -46,6 +46,13 @@ export type SiteContent = {
       saturday?: number;
       sunday?: number;
     };
+    occupancyPricing: {
+      enabled: boolean;
+      baseOccupancy: number;
+      maxOccupancy: number;
+      perAdultRate: number;
+      description?: string;
+    };
   };
   reservations: Array<{
     id: string;
@@ -74,60 +81,102 @@ type SiteContentRecord = {
 
 const defaultContent: SiteContent = {
   hero: {
-    eyebrow: "Luxury alpine retreat",
-    headline: "The Loft at Jindabyne",
+    eyebrow: "Snowy Mountains Retreat",
+    headline: "The Loft @ Jindabyne",
     description:
-      "Elevated living above Lake Jindabyne with panoramic views, crafted interiors, and the Snowy Mountains on your doorstep.",
+      "A two bedroom apartment with a loft and lake views located 500 meters from the Jindabyne township. Restaurants, bars, cafes and shops are only a 10 minute walk away. The perfect base for winter and summer activities in the Snowy Mountains region.",
   },
   gallery: [
     {
-      src: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80",
-      alt: "Sunset over Lake Jindabyne viewed from an elevated terrace",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/1.png",
+      alt: "The Loft @ Jindabyne - Property view",
     },
     {
-      src: "https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=1200&q=80",
-      alt: "Scandinavian loft interior with timber accents and mountain views",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/2.png",
+      alt: "The Loft @ Jindabyne - Interior space",
     },
     {
-      src: "https://images.unsplash.com/photo-1522708323590-1063cf0f74d6?auto=format&fit=crop&w=1600&q=80",
-      alt: "Modern kitchen and dining area bathed in natural light",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/3.png",
+      alt: "The Loft @ Jindabyne - Living area",
     },
     {
-      src: "https://images.unsplash.com/photo-1505692794403-34cb7c508e08?auto=format&fit=crop&w=1200&q=80",
-      alt: "Inviting bedroom with plush linens and soft lighting",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/4.png",
+      alt: "The Loft @ Jindabyne - Kitchen and dining",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/5.png",
+      alt: "The Loft @ Jindabyne - Bedroom",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/6.png",
+      alt: "The Loft @ Jindabyne - Bathroom",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/7.png",
+      alt: "The Loft @ Jindabyne - Outdoor space",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/8.png",
+      alt: "The Loft @ Jindabyne - Lake view",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/9.png",
+      alt: "The Loft @ Jindabyne - Amenities",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/10.png",
+      alt: "The Loft @ Jindabyne - Detail shot",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/11.png",
+      alt: "The Loft @ Jindabyne - Evening ambiance",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/12.png",
+      alt: "The Loft @ Jindabyne - Overall atmosphere",
     },
   ],
   details: {
-    introHeading: "Alpine luxury made for unwinding together",
+    introHeading: "About The Loft @ Jindabyne",
     introCopy:
-      "The Loft at Jindabyne is a three-storey escape designed for groups who crave space, comfort, and uninterrupted lake vistas. Thoughtful zoning keeps the living, sleeping, and gear-drop zones distinct, so every guest can move at their own pace after days on the slopes or the trails.",
+      "The Loft @ Jindabyne is a two bedroom apartment with a loft and lake views located 500 meters from the Jindabyne township. Restaurants, bars, cafes and shops are only a 10 minute walk away. The perfect base for winter and summer activities in the Snowy Mountains region.",
     highlights: [
       {
         title: "Sleeps",
-        highlight: "Up to 8 guests",
+        highlight: "Up to 9 guests",
         description:
-          "Three spacious bedrooms plus a flexible loft retreat, all dressed with premium linen.",
+          "Bedroom 1: Queen • Bedroom 2 (Bunk Room): 1 x Double and 3 x Singles • Loft front: Queen • Loft back: 2 x Singles",
       },
       {
         title: "Location",
-        highlight: "Heart of Jindabyne",
+        highlight: "500m from township",
         description:
-          "Moments from the lakefront, cafés, and the Snowy Mountains Highway for quick resort access.",
+          "3/28 Ingebyra Street, Jindabyne 2627. Restaurants, bars, cafes and shops are a 10 minute walk away.",
       },
       {
-        title: "Design",
-        highlight: "Architecturally crafted",
+        title: "Check-in / Check-out",
+        highlight: "1:00 pm / 11:00 am",
         description:
-          "Soaring timber ceilings, polished concrete floors, and panoramic glazing frame alpine vistas.",
+          "Self check-in with door code provided prior to arrival. Cancel until 14 days before check-in for full refund.",
       },
     ],
     amenities: [
-      "Luxury bedding & heated flooring",
-      "Indoor fireplace & outdoor firepit",
-      "Chef's kitchen with butler's pantry",
-      "Smart home climate control",
-      "Dedicated mudroom & ski storage",
-      "High-speed Wi-Fi & Sonos audio",
+      "Lake views from apartment",
+      "Self check-in with door code",
+      "BBQ in carport (with battery light)",
+      "5 toboggans available for snow play",
+      "Kids ski gear collection available",
+      "Doonas, pillows and blankets provided",
+      "BYO linen (sheets, pillow cases, towels)",
+      "No smoking, no pets, no parties",
+      "Available to friends & family only",
+      "Please clean before departure",
+      "Vacuum carpets & mop tiles",
+      "Clean bathroom & empty bins",
+      "Unstack dishwasher & wipe surfaces",
+      "Kids ski gear in hallway cupboard",
+      "Cleaning products under sink",
+      "Loft access via steep ladder",
     ],
   },
   bookings: {
@@ -139,6 +188,13 @@ const defaultContent: SiteContent = {
     maximumNights: null,
     customRates: [],
     dayOfWeekRates: {},
+    occupancyPricing: {
+      enabled: false,
+      baseOccupancy: 2,
+      maxOccupancy: 8,
+      perAdultRate: 50,
+      description: "Base rate includes 2 guests. Additional adults (12+) charged per night.",
+    },
   },
   reservations: [],
 };

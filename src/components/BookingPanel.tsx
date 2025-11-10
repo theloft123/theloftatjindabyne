@@ -46,6 +46,7 @@ type StayBreakdown = {
   weekdayNights: number;
   nightlyTotal: number;
   cleaningFee: number;
+  occupancyFee: number;
   total: number;
 };
 
@@ -60,6 +61,8 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
     name: "",
     email: "",
     phone: "",
+    adults: 2,
+    childrenUnder12: 0,
   });
   const [showGuestForm, setShowGuestForm] = useState(false);
 
@@ -133,7 +136,19 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
       nightlyTotal += rateForNight;
     }
 
-    const total = nightlyTotal + bookings.cleaningFee;
+    // Calculate occupancy fees if enabled
+    let occupancyFee = 0;
+    if (bookings.occupancyPricing?.enabled) {
+      const totalGuests = guestDetails.adults + guestDetails.childrenUnder12;
+      const extraAdults = Math.max(0, guestDetails.adults - bookings.occupancyPricing.baseOccupancy);
+      
+      if (extraAdults > 0) {
+        // Charge per extra adult (12+), per night
+        occupancyFee = extraAdults * bookings.occupancyPricing.perAdultRate * nights;
+      }
+    }
+
+    const total = nightlyTotal + bookings.cleaningFee + occupancyFee;
 
     return {
       nights,
@@ -141,9 +156,10 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
       weekdayNights,
       nightlyTotal,
       cleaningFee: bookings.cleaningFee,
+      occupancyFee,
       total,
     } satisfies StayBreakdown;
-  }, [bookings, range]);
+  }, [bookings, range, guestDetails.adults, guestDetails.childrenUnder12]);
 
   const disabledDays = useMemo(() => {
     const blocked = bookings.blockedDates.flatMap(({ start, end }) => {
@@ -234,6 +250,17 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                     <dt>Cleaning & preparation</dt>
                     <dd>${breakdown.cleaningFee}</dd>
                   </div>
+                  {breakdown.occupancyFee > 0 && (
+                    <div className="flex items-center justify-between">
+                      <dt>
+                        Additional adults{" "}
+                        <span className="text-slate-500">
+                          ({Math.max(0, guestDetails.adults - (bookings.occupancyPricing?.baseOccupancy ?? 0))} extra adults)
+                        </span>
+                      </dt>
+                      <dd>${breakdown.occupancyFee}</dd>
+                    </div>
+                  )}
                 </dl>
                 <div className="mt-6 flex items-center justify-between text-base font-semibold">
                   <p>Total due</p>
@@ -250,6 +277,66 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                   </button>
                 ) : (
                   <div className="mt-6 space-y-4">
+                    {bookings.occupancyPricing?.enabled && (
+                      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-4">
+                        <p className="text-xs font-semibold uppercase tracking-[0.3em] text-sky-700">
+                          Guest Count (Required)
+                        </p>
+                        <p className="mt-2 text-xs text-sky-600">
+                          {bookings.occupancyPricing.description}
+                        </p>
+                        <p className="mt-1 text-xs text-sky-600">
+                          Maximum occupancy: {bookings.occupancyPricing.maxOccupancy} guests
+                        </p>
+                        <div className="mt-3 grid gap-3 grid-cols-2">
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                              Adults (12+)
+                            </label>
+                            <input
+                              type="number"
+                              min="1"
+                              max={bookings.occupancyPricing.maxOccupancy}
+                              required
+                              value={guestDetails.adults}
+                              onChange={(e) => {
+                                const adults = parseInt(e.target.value) || 1;
+                                const total = adults + guestDetails.childrenUnder12;
+                                if (total <= bookings.occupancyPricing!.maxOccupancy) {
+                                  setGuestDetails({...guestDetails, adults});
+                                }
+                              }}
+                              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                              Children (under 12)
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              max={bookings.occupancyPricing.maxOccupancy - 1}
+                              required
+                              value={guestDetails.childrenUnder12}
+                              onChange={(e) => {
+                                const children = parseInt(e.target.value) || 0;
+                                const total = guestDetails.adults + children;
+                                if (total <= bookings.occupancyPricing!.maxOccupancy) {
+                                  setGuestDetails({...guestDetails, childrenUnder12: children});
+                                }
+                              }}
+                              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                            />
+                          </div>
+                        </div>
+                        {(guestDetails.adults + guestDetails.childrenUnder12) > bookings.occupancyPricing.maxOccupancy && (
+                          <p className="mt-2 text-xs text-red-600">
+                            Total guests cannot exceed {bookings.occupancyPricing.maxOccupancy}
+                          </p>
+                        )}
+                      </div>
+                    )}
                     <div className="space-y-3">
                       <div>
                         <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
