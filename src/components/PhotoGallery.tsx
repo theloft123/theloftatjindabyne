@@ -10,6 +10,9 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
     return null;
   }
 
+  // Reverse the photos array to display in reverse order
+  const reversedPhotos = [...photos].reverse();
+
   return (
     <section id="photos" className="scroll-mt-20">
       <div className="flex items-center justify-between">
@@ -20,7 +23,7 @@ export function PhotoGallery({ photos }: PhotoGalleryProps) {
           Scenic loft living
         </span>
       </div>
-      <PhotoMosaic photos={photos} />
+      <PhotoMosaic photos={reversedPhotos} />
     </section>
   );
 }
