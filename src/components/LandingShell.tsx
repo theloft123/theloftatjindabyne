@@ -47,17 +47,25 @@ export function LandingShell() {
               The Loft at Jindabyne
             </h1>
           </div>
-          <nav className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 md:flex">
-            <a href="#details" className="hover:text-slate-900">
-              Details
-            </a>
-            <a href="#photos" className="hover:text-slate-900">
-              Photos
-            </a>
-            <a href="#availability" className="hover:text-slate-900">
-              Availability
-            </a>
-          </nav>
+          <div className="flex items-center gap-4">
+            <nav className="hidden items-center gap-4 text-xs font-semibold uppercase tracking-[0.35em] text-slate-500 md:flex">
+              <a href="#details" className="hover:text-slate-900">
+                Details
+              </a>
+              <a href="#photos" className="hover:text-slate-900">
+                Photos
+              </a>
+              <a href="#availability" className="hover:text-slate-900">
+                Availability
+              </a>
+            </nav>
+            <button
+              onClick={clearAccess}
+              className="rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400 hover:bg-slate-50"
+            >
+              Logout
+            </button>
+          </div>
         </header>
         {role === "admin" && (
           <div className="rounded-3xl border border-sky-200 bg-sky-50 px-6 py-4 text-sky-700">

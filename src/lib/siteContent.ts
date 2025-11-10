@@ -29,6 +29,7 @@ export type SiteContent = {
     weekendRate: number;
     cleaningFee: number;
     minimumNights: number;
+    maximumNights: number | null;
   };
   reservations: Array<{
     id: string;
@@ -119,6 +120,7 @@ const defaultContent: SiteContent = {
     weekendRate: 590,
     cleaningFee: 220,
     minimumNights: 2,
+    maximumNights: null,
   },
   reservations: [],
 };

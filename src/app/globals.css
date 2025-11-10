@@ -36,7 +36,7 @@ a {
   box-sizing: border-box;
 }
 
-/* Calendar styling fixes */
+/* Calendar styling fixes - force proper table layout */
 .rdp {
   --rdp-cell-size: 40px;
   --rdp-accent-color: #0ea5e9;
@@ -45,25 +45,63 @@ a {
 }
 
 .rdp-months {
-  display: flex;
-  flex-direction: row;
-  gap: 1.5rem;
+  display: flex !important;
+  flex-direction: row !important;
+  gap: 1.5rem !important;
 }
 
 .rdp-month {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1rem !important;
+  flex: 1;
 }
 
 .rdp-table {
-  width: 100%;
-  max-width: 100%;
-  border-collapse: collapse;
+  width: 100% !important;
+  max-width: 100% !important;
+  border-collapse: collapse !important;
+  display: table !important;
+  table-layout: fixed !important;
+}
+
+.rdp-thead {
+  display: table-header-group !important;
+}
+
+.rdp-tbody {
+  display: table-row-group !important;
+}
+
+.rdp-head_row,
+.rdp-row {
+  display: table-row !important;
+}
+
+.rdp-head_cell,
+.rdp-cell {
+  display: table-cell !important;
+  position: relative !important;
+  vertical-align: middle !important;
+  text-align: center !important;
+  width: 14.28% !important; /* 100% / 7 days */
+}
+
+.rdp-head_cell {
+  padding: 0.5rem 0 !important;
+}
+
+.rdp-day {
+  width: 40px !important;
+  height: 40px !important;
+  margin: 0 auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
 }
 
 @media (max-width: 768px) {
   .rdp-months {
-    flex-direction: column;
+    flex-direction: column !important;
   }
 }

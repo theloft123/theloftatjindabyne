@@ -13,28 +13,27 @@ import { useAccess } from "@/context/AccessContext";
 import type { SiteContent } from "@/lib/siteContent";
 
 const CALENDAR_CLASS_NAMES = {
-  months: "flex flex-col md:flex-row gap-6",
-  month: "space-y-4",
+  months: "",
+  month: "",
   caption: "flex justify-between items-center px-2 py-2 text-sm font-medium text-slate-700",
-  caption_label: "font-semibold uppercase tracking-[0.3em]",
+  caption_label: "font-semibold uppercase tracking-[0.3em] text-sm",
   nav: "flex gap-1",
   nav_button: "h-7 w-7 rounded-md border border-slate-300 bg-white hover:bg-slate-50 flex items-center justify-center",
   nav_button_previous: "",
   nav_button_next: "",
-  table: "w-full border-collapse",
+  table: "",
   head_row: "",
-  head_cell:
-    "text-center text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 py-2",
+  head_cell: "text-xs font-semibold uppercase tracking-[0.3em] text-slate-500",
   row: "",
-  cell: "relative focus-within:z-20",
-  day: "h-10 w-10 flex items-center justify-center rounded-full text-sm font-medium text-slate-700 transition hover:bg-slate-100",
+  cell: "",
+  day: "rounded-full text-sm font-medium text-slate-700 transition hover:bg-slate-100 cursor-pointer",
   day_today: "border-2 border-slate-400 bg-white text-slate-900 font-semibold",
   day_outside: "text-slate-300 opacity-50",
   day_selected: "bg-slate-900 text-white shadow-lg hover:bg-slate-800",
   day_range_start:
-    "rounded-l-full bg-sky-500 text-slate-950 hover:bg-sky-400",
-  day_range_end: "rounded-r-full bg-sky-500 text-slate-950 hover:bg-sky-400",
-  day_range_middle: "rounded-none bg-sky-100 text-slate-900 hover:bg-sky-200",
+    "bg-sky-500 text-slate-950 hover:bg-sky-400",
+  day_range_end: "bg-sky-500 text-slate-950 hover:bg-sky-400",
+  day_range_middle: "bg-sky-100 text-slate-900 hover:bg-sky-200",
   day_disabled: "cursor-not-allowed text-slate-300 line-through opacity-40 hover:bg-transparent",
 } as const;
 
