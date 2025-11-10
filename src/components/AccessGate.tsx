@@ -146,9 +146,9 @@ export function AccessGate({ children }: AccessGateProps) {
           Need assistance? Email{" "}
           <a
             className="font-medium text-sky-300"
-            href="mailto:stay@theloftjindabyne.com"
+            href="mailto:jack.francis.aus@gmail.com"
           >
-            stay@theloftjindabyne.com
+            jack.francis.aus@gmail.com
           </a>
         </p>
       </div>

@@ -310,10 +310,17 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                               required
                               value={guestDetails.adults}
                               onChange={(e) => {
-                                const adults = parseInt(e.target.value) || 1;
-                                const total = adults + guestDetails.childrenUnder12;
-                                if (total <= bookings.occupancyPricing!.maxOccupancy) {
-                                  setGuestDetails({...guestDetails, adults});
+                                const value = e.target.value;
+                                if (value === '') return; // Allow empty temporarily while typing
+                                const adults = parseInt(value, 10);
+                                if (isNaN(adults)) return;
+                                const clampedAdults = Math.max(1, Math.min(adults, bookings.occupancyPricing!.maxOccupancy));
+                                setGuestDetails({...guestDetails, adults: clampedAdults});
+                              }}
+                              onBlur={(e) => {
+                                // On blur, ensure we have a valid value
+                                if (e.target.value === '' || parseInt(e.target.value, 10) < 1) {
+                                  setGuestDetails({...guestDetails, adults: 1});
                                 }
                               }}
                               className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
@@ -330,10 +337,18 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                               required
                               value={guestDetails.childrenUnder12}
                               onChange={(e) => {
-                                const children = parseInt(e.target.value) || 0;
-                                const total = guestDetails.adults + children;
-                                if (total <= bookings.occupancyPricing!.maxOccupancy) {
-                                  setGuestDetails({...guestDetails, childrenUnder12: children});
+                                const value = e.target.value;
+                                if (value === '') return; // Allow empty temporarily while typing
+                                const children = parseInt(value, 10);
+                                if (isNaN(children)) return;
+                                const maxChildren = bookings.occupancyPricing!.maxOccupancy - 1;
+                                const clampedChildren = Math.max(0, Math.min(children, maxChildren));
+                                setGuestDetails({...guestDetails, childrenUnder12: clampedChildren});
+                              }}
+                              onBlur={(e) => {
+                                // On blur, ensure we have a valid value
+                                if (e.target.value === '' || parseInt(e.target.value, 10) < 0) {
+                                  setGuestDetails({...guestDetails, childrenUnder12: 0});
                                 }
                               }}
                               className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"

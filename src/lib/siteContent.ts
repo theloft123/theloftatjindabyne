@@ -88,52 +88,52 @@ const defaultContent: SiteContent = {
   },
   gallery: [
     {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/1.png",
-      alt: "The Loft @ Jindabyne - Property view",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/2.png",
-      alt: "The Loft @ Jindabyne - Interior space",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/3.png",
-      alt: "The Loft @ Jindabyne - Living area",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/4.png",
-      alt: "The Loft @ Jindabyne - Kitchen and dining",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/5.png",
-      alt: "The Loft @ Jindabyne - Bedroom",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/6.png",
-      alt: "The Loft @ Jindabyne - Bathroom",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/7.png",
-      alt: "The Loft @ Jindabyne - Outdoor space",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/8.png",
-      alt: "The Loft @ Jindabyne - Lake view",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/9.png",
-      alt: "The Loft @ Jindabyne - Amenities",
-    },
-    {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/10.png",
-      alt: "The Loft @ Jindabyne - Detail shot",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/12.png",
+      alt: "The Loft @ Jindabyne - Overall atmosphere",
     },
     {
       src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/11.png",
       alt: "The Loft @ Jindabyne - Evening ambiance",
     },
     {
-      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/12.png",
-      alt: "The Loft @ Jindabyne - Overall atmosphere",
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/10.png",
+      alt: "The Loft @ Jindabyne - Detail shot",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/9.png",
+      alt: "The Loft @ Jindabyne - Amenities",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/8.png",
+      alt: "The Loft @ Jindabyne - Lake view",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/7.png",
+      alt: "The Loft @ Jindabyne - Outdoor space",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/6.png",
+      alt: "The Loft @ Jindabyne - Bathroom",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/5.png",
+      alt: "The Loft @ Jindabyne - Bedroom",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/4.png",
+      alt: "The Loft @ Jindabyne - Kitchen and dining",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/3.png",
+      alt: "The Loft @ Jindabyne - Living area",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/2.png",
+      alt: "The Loft @ Jindabyne - Interior space",
+    },
+    {
+      src: "https://hjixtvrbeqthaepwltqh.supabase.co/storage/v1/object/public/images/1.png",
+      alt: "The Loft @ Jindabyne - Property view",
     },
   ],
   details: {
