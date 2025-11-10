@@ -620,20 +620,33 @@ export function AdminPanel() {
       <div className={SECTION_CLASS}>
         <div className="flex flex-col gap-3">
           <h3 className="text-base font-semibold text-slate-900">Guest password</h3>
-          <input
-            className="rounded-2xl border border-slate-200 px-4 py-3"
-            placeholder="New guest password"
-            type="password"
-            value={passwords.guest}
-            onChange={(event) => setPasswords({ ...passwords, guest: event.target.value })}
-          />
-          <input
-            className="rounded-2xl border border-slate-200 px-4 py-3"
-            placeholder="Confirm admin password"
-            type="password"
-            value={passwords.currentAdmin}
-            onChange={(event) => setPasswords({ ...passwords, currentAdmin: event.target.value })}
-          />
+          <p className="text-sm text-slate-500">
+            Change the password that guests use to access the site. You must confirm with your current admin password.
+          </p>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              New guest password
+            </label>
+            <input
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+              placeholder="Enter new guest password"
+              type="password"
+              value={passwords.guest}
+              onChange={(event) => setPasswords({ ...passwords, guest: event.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              Current admin password (to confirm)
+            </label>
+            <input
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+              placeholder="Enter your current admin password"
+              type="password"
+              value={passwords.currentAdmin}
+              onChange={(event) => setPasswords({ ...passwords, currentAdmin: event.target.value })}
+            />
+          </div>
           <button
             type="button"
             className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white"
@@ -651,20 +664,33 @@ export function AdminPanel() {
       <div className={SECTION_CLASS}>
         <div className="flex flex-col gap-3">
           <h3 className="text-base font-semibold text-slate-900">Admin password</h3>
-          <input
-            className="rounded-2xl border border-slate-200 px-4 py-3"
-            placeholder="New admin password"
-            type="password"
-            value={passwords.admin}
-            onChange={(event) => setPasswords({ ...passwords, admin: event.target.value })}
-          />
-          <input
-            className="rounded-2xl border border-slate-200 px-4 py-3"
-            placeholder="Confirm new admin password"
-            type="password"
-            value={passwords.adminConfirm}
-            onChange={(event) => setPasswords({ ...passwords, adminConfirm: event.target.value })}
-          />
+          <p className="text-sm text-slate-500">
+            Change your admin password. You'll need to log in again with the new password next time.
+          </p>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              New admin password
+            </label>
+            <input
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+              placeholder="Enter new admin password"
+              type="password"
+              value={passwords.admin}
+              onChange={(event) => setPasswords({ ...passwords, admin: event.target.value })}
+            />
+          </div>
+          <div>
+            <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+              Confirm new admin password
+            </label>
+            <input
+              className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+              placeholder="Re-enter new admin password"
+              type="password"
+              value={passwords.adminConfirm}
+              onChange={(event) => setPasswords({ ...passwords, adminConfirm: event.target.value })}
+            />
+          </div>
           <button
             type="button"
             className="rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white"
