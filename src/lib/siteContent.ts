@@ -201,10 +201,10 @@ const defaultContent: SiteContent = {
 
 export async function getSiteContent() {
   const { data, error } = await supabaseServer
-    .from<SiteContentRecord>(CONTENT_TABLE)
+    .from(CONTENT_TABLE)
     .select("*")
     .eq("id", CONTENT_ROW_ID)
-    .maybeSingle();
+    .maybeSingle<SiteContentRecord>();
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -223,13 +223,13 @@ export async function getSiteContent() {
   }
 
   const { data: inserted, error: insertError } = await supabaseServer
-    .from<SiteContentRecord>(CONTENT_TABLE)
+    .from(CONTENT_TABLE)
     .upsert({
       id: CONTENT_ROW_ID,
       content: defaultContent,
     })
     .select("*")
-    .single();
+    .single<SiteContentRecord>();
 
   if (insertError) {
     throw new Error(`Failed to seed site content: ${insertError.message}`);
@@ -240,7 +240,7 @@ export async function getSiteContent() {
 
 export async function updateSiteContent(content: SiteContent) {
   const { error } = await supabaseServer
-    .from<SiteContentRecord>(CONTENT_TABLE)
+    .from(CONTENT_TABLE)
     .update({ content })
     .eq("id", CONTENT_ROW_ID);
 

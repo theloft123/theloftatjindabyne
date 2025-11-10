@@ -16,10 +16,10 @@ type SecurityRecord = {
 
 export async function ensureSecurityRecord() {
   const { data, error } = await supabaseServer
-    .from<SecurityRecord>(SECURITY_TABLE)
+    .from(SECURITY_TABLE)
     .select("*")
     .eq("id", SECURITY_ROW_ID)
-    .maybeSingle();
+    .maybeSingle<SecurityRecord>();
 
   if (error) {
     if (error.code === "PGRST116") {
@@ -46,14 +46,14 @@ export async function ensureSecurityRecord() {
   const adminHash = await bcrypt.hash(defaultAdminPassword, 10);
 
   const { data: inserted, error: insertError } = await supabaseServer
-    .from<SecurityRecord>(SECURITY_TABLE)
+    .from(SECURITY_TABLE)
     .upsert({
       id: SECURITY_ROW_ID,
       guest_password_hash: guestHash,
       admin_password_hash: adminHash,
     })
     .select("*")
-    .single();
+    .single<SecurityRecord>();
 
   if (insertError) {
     throw new Error(`Failed to create security record: ${insertError.message}`);
@@ -78,7 +78,7 @@ export async function updatePassword(role: Role, newPassword: string) {
   const updateColumn =
     role === "admin" ? "admin_password_hash" : "guest_password_hash";
   const { error } = await supabaseServer
-    .from<SecurityRecord>(SECURITY_TABLE)
+    .from(SECURITY_TABLE)
     .update({
       [updateColumn]: hash,
     })

@@ -136,7 +136,7 @@ export async function updateBookingStatus(
   notes?: string
 ): Promise<Reservation> {
   const content = await getSiteContent();
-  const index = content.reservations.findIndex((r) => r.id === reservationId);
+  const index = content.reservations.findIndex((r: Reservation) => r.id === reservationId);
 
   if (index === -1) {
     throw new Error(`Reservation ${reservationId} not found`);
@@ -170,7 +170,7 @@ export async function updateBookingPayment(
   stripeCustomerId?: string
 ): Promise<Reservation> {
   const content = await getSiteContent();
-  const index = content.reservations.findIndex((r) => r.id === reservationId);
+  const index = content.reservations.findIndex((r: Reservation) => r.id === reservationId);
 
   if (index === -1) {
     throw new Error(`Reservation ${reservationId} not found`);
@@ -201,7 +201,7 @@ export async function updateBookingPayment(
  */
 export async function deleteBooking(reservationId: string): Promise<void> {
   const content = await getSiteContent();
-  const filtered = content.reservations.filter((r) => r.id !== reservationId);
+  const filtered = content.reservations.filter((r: Reservation) => r.id !== reservationId);
 
   if (filtered.length === content.reservations.length) {
     throw new Error(`Reservation ${reservationId} not found`);
