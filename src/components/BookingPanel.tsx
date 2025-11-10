@@ -6,6 +6,9 @@ import {
   eachDayOfInterval,
   format,
   isWeekend,
+  getDay,
+  isWithinInterval,
+  parseISO,
 } from "date-fns";
 import { useMemo, useState } from "react";
 import { DateRange, DayPicker } from "react-day-picker";
@@ -53,6 +56,12 @@ type BookingPanelProps = {
 export function BookingPanel({ bookings }: BookingPanelProps) {
   const [range, setRange] = useState<DateRange | undefined>();
   const { role } = useAccess();
+  const [guestDetails, setGuestDetails] = useState({
+    name: "",
+    email: "",
+    phone: "",
+  });
+  const [showGuestForm, setShowGuestForm] = useState(false);
 
   const breakdown = useMemo(() => {
     if (!range?.from || !range?.to) {
@@ -65,17 +74,64 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
       return null;
     }
 
+    if (bookings.maximumNights && nights > bookings.maximumNights) {
+      return null;
+    }
+
     const stayNights = eachDayOfInterval({
       start: range.from,
       end: addDays(range.to, -1),
     });
 
-    const weekendNights = stayNights.filter((date) => isWeekend(date)).length;
-    const weekdayNights = nights - weekendNights;
+    // Calculate nightly total with dynamic pricing
+    let nightlyTotal = 0;
+    let weekendNights = 0;
+    let weekdayNights = 0;
 
-    const nightlyTotal =
-      weekdayNights * bookings.weekdayRate +
-      weekendNights * bookings.weekendRate;
+    for (const date of stayNights) {
+      const dayOfWeek = getDay(date); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+      const dayName = dayNames[dayOfWeek] as keyof typeof bookings.dayOfWeekRates;
+
+      // Check for custom rate periods
+      let rateForNight: number | null = null;
+      
+      if (bookings.customRates && bookings.customRates.length > 0) {
+        for (const customRate of bookings.customRates) {
+          const start = parseISO(customRate.startDate);
+          const end = parseISO(customRate.endDate);
+          if (isWithinInterval(date, { start, end })) {
+            rateForNight = customRate.rate;
+            break;
+          }
+        }
+      }
+
+      // Check for day-of-week rate
+      if (rateForNight === null && bookings.dayOfWeekRates && bookings.dayOfWeekRates[dayName]) {
+        rateForNight = bookings.dayOfWeekRates[dayName]!;
+      }
+
+      // Fall back to weekend/weekday rates
+      if (rateForNight === null) {
+        if (isWeekend(date)) {
+          rateForNight = bookings.weekendRate;
+          weekendNights++;
+        } else {
+          rateForNight = bookings.weekdayRate;
+          weekdayNights++;
+        }
+      } else {
+        // Count as weekend or weekday for display purposes
+        if (isWeekend(date)) {
+          weekendNights++;
+        } else {
+          weekdayNights++;
+        }
+      }
+
+      nightlyTotal += rateForNight;
+    }
 
     const total = nightlyTotal + bookings.cleaningFee;
 
@@ -183,17 +239,81 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                   <p>Total due</p>
                   <p>${breakdown.total}</p>
                 </div>
-                <button
-                  type="button"
-                  className="mt-6 flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
-                  onClick={() => {
-                    alert(
-                      "Checkout is coming soon. We’ll connect this button to a secure Stripe payment when ready."
-                    );
-                  }}
-                >
-                  Proceed to Checkout
-                </button>
+                
+                {!showGuestForm ? (
+                  <button
+                    type="button"
+                    className="mt-6 flex w-full items-center justify-center rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+                    onClick={() => setShowGuestForm(true)}
+                  >
+                    Continue to Guest Details
+                  </button>
+                ) : (
+                  <div className="mt-6 space-y-4">
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                          Full Name
+                        </label>
+                        <input
+                          type="text"
+                          required
+                          value={guestDetails.name}
+                          onChange={(e) => setGuestDetails({...guestDetails, name: e.target.value})}
+                          placeholder="John Smith"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                          Email Address
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={guestDetails.email}
+                          onChange={(e) => setGuestDetails({...guestDetails, email: e.target.value})}
+                          placeholder="john@example.com"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                          Phone Number
+                        </label>
+                        <input
+                          type="tel"
+                          required
+                          value={guestDetails.phone}
+                          onChange={(e) => setGuestDetails({...guestDetails, phone: e.target.value})}
+                          placeholder="+61 400 000 000"
+                          className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3 text-sm"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        type="button"
+                        className="flex-1 rounded-full border border-slate-300 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-slate-600 transition hover:border-slate-400"
+                        onClick={() => setShowGuestForm(false)}
+                      >
+                        Back
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!guestDetails.name || !guestDetails.email || !guestDetails.phone}
+                        className="flex-1 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => {
+                          alert(
+                            `Checkout is coming soon. We'll connect this button to Stripe.\n\nGuest: ${guestDetails.name}\nEmail: ${guestDetails.email}\nPhone: ${guestDetails.phone}`
+                          );
+                        }}
+                      >
+                        Proceed to Checkout
+                      </button>
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <EmptyState bookings={bookings} role={role} />
@@ -229,7 +349,9 @@ function EmptyState({
       <p className="text-sm leading-6">
         Choose check-in and check-out dates to calculate the nightly breakdown
         and secure your stay. We require a minimum stay of {bookings.minimumNights}
-        nights.
+        {bookings.maximumNights 
+          ? ` nights, with a maximum of ${bookings.maximumNights} nights.`
+          : " nights."}
       </p>
       <p className="text-xs uppercase tracking-[0.3em] text-slate-400">
         Weeknights from ${bookings.weekdayRate} · Weekends from ${bookings.weekendRate}

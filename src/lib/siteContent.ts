@@ -30,6 +30,22 @@ export type SiteContent = {
     cleaningFee: number;
     minimumNights: number;
     maximumNights: number | null;
+    customRates: Array<{
+      id: string;
+      startDate: string;
+      endDate: string;
+      rate: number;
+      label: string;
+    }>;
+    dayOfWeekRates: {
+      monday?: number;
+      tuesday?: number;
+      wednesday?: number;
+      thursday?: number;
+      friday?: number;
+      saturday?: number;
+      sunday?: number;
+    };
   };
   reservations: Array<{
     id: string;
@@ -121,6 +137,8 @@ const defaultContent: SiteContent = {
     cleaningFee: 220,
     minimumNights: 2,
     maximumNights: null,
+    customRates: [],
+    dayOfWeekRates: {},
   },
   reservations: [],
 };

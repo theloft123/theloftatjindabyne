@@ -376,6 +376,120 @@ export function AdminPanel() {
                   handleContentChange("bookings", { ...draft.bookings, minimumNights: value })
                 }
               />
+              <NumberField
+                label="Maximum nights (optional)"
+                value={draft.bookings.maximumNights ?? 0}
+                onChange={(value) =>
+                  handleContentChange("bookings", { ...draft.bookings, maximumNights: value > 0 ? value : null })
+                }
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Day-of-week rates (optional)
+              </label>
+              <p className="mt-2 text-xs text-slate-500">
+                Override standard weekday/weekend rates for specific days. Leave blank to use standard rates.
+              </p>
+              <div className="mt-3 grid gap-3 md:grid-cols-3">
+                <NumberField
+                  label="Monday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.monday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, monday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Tuesday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.tuesday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, tuesday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Wednesday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.wednesday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, wednesday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Thursday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.thursday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, thursday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Friday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.friday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, friday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Saturday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.saturday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, saturday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+                <NumberField
+                  label="Sunday"
+                  suffix="AUD"
+                  value={draft.bookings.dayOfWeekRates.sunday ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      dayOfWeekRates: { ...draft.bookings.dayOfWeekRates, sunday: value > 0 ? value : undefined },
+                    })
+                  }
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Custom rate periods
+              </label>
+              <p className="mt-2 text-xs text-slate-500">
+                Define special pricing for specific date ranges (holidays, peak season, etc.). Enter one per line: YYYY-MM-DD to YYYY-MM-DD | $rate | label
+              </p>
+              <textarea
+                className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                rows={6}
+                placeholder="2025-12-20 to 2026-01-10 | 750 | Christmas/New Year Peak"
+                value={formatCustomRates(draft.bookings.customRates)}
+                onChange={(event) =>
+                  handleContentChange("bookings", {
+                    ...draft.bookings,
+                    customRates: parseCustomRates(event.target.value),
+                  })
+                }
+              />
             </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
@@ -539,6 +653,44 @@ function parseBlockedDates(value: string): SiteContent["bookings"]["blockedDates
         start,
         end: end ?? start,
         note: note ?? undefined,
+      };
+    })
+    .filter((item): item is NonNullable<typeof item> => Boolean(item));
+}
+
+function formatCustomRates(customRates: SiteContent["bookings"]["customRates"]) {
+  return customRates
+    .map((rate) => `${rate.startDate} to ${rate.endDate} | ${rate.rate} | ${rate.label}`)
+    .join("\n");
+}
+
+function parseCustomRates(value: string): SiteContent["bookings"]["customRates"] {
+  return value
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .map((line) => {
+      const parts = line.split("|").map((part) => part.trim());
+      if (parts.length < 3) return null;
+
+      const [range, rateStr, label] = parts;
+      const [startDate, endDate] = range
+        .split(/to/i)
+        .map((part) => part.trim())
+        .filter(Boolean);
+
+      const rate = parseFloat(rateStr.replace(/[^0-9.]/g, ""));
+
+      if (!startDate || !endDate || isNaN(rate) || !label) {
+        return null;
+      }
+
+      return {
+        id: crypto.randomUUID(),
+        startDate,
+        endDate,
+        rate,
+        label,
       };
     })
     .filter((item): item is NonNullable<typeof item> => Boolean(item));
