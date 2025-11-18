@@ -68,12 +68,12 @@ export function SuccessContent() {
             <p className="mt-4 text-slate-600">
               {error || "Invalid booking session"}
             </p>
-            <Link
-              href="/"
-              className="mt-8 inline-block rounded-full bg-slate-900 px-8 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
-            >
-              Return Home
-            </Link>
+          <Link
+            href="/"
+            className="mt-8 inline-block rounded-full bg-slate-900 px-8 py-3 text-base font-bold uppercase tracking-wide text-white transition hover:bg-slate-800"
+          >
+            Return Home
+          </Link>
           </div>
         </div>
       </div>
@@ -161,7 +161,7 @@ export function SuccessContent() {
           </div>
           <Link
             href="/"
-            className="block w-full rounded-full bg-slate-900 px-8 py-3 text-center text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800"
+            className="block w-full rounded-full bg-slate-900 px-8 py-3 text-center text-base font-bold uppercase tracking-wide text-white transition hover:bg-slate-800"
           >
             Return to Home
           </Link>
