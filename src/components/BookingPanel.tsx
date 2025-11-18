@@ -66,6 +66,7 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
   });
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
   // Store input values as strings to allow proper editing/backspace
   const [adultsInput, setAdultsInput] = useState("2");
   const [childrenInput, setChildrenInput] = useState("0");
@@ -430,15 +431,63 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
                       </button>
                       <button
                         type="button"
-                        disabled={!guestDetails.name || !guestDetails.email || !guestDetails.phone}
+                        disabled={
+                          !guestDetails.name ||
+                          !guestDetails.email ||
+                          !guestDetails.phone ||
+                          isProcessingCheckout ||
+                          (bookings.occupancyPricing?.enabled &&
+                            guestDetails.adults + guestDetails.childrenUnder12 >
+                              bookings.occupancyPricing.maxOccupancy)
+                        }
                         className="flex-1 rounded-full bg-slate-900 px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={() => {
-                          alert(
-                            `Checkout is coming soon. We'll connect this button to Stripe.\n\nGuest: ${guestDetails.name}\nEmail: ${guestDetails.email}\nPhone: ${guestDetails.phone}`
-                          );
+                        onClick={async () => {
+                          if (!range?.from || !range?.to || !breakdown) return;
+
+                          setIsProcessingCheckout(true);
+                          try {
+                            const response = await fetch("/api/stripe/checkout", {
+                              method: "POST",
+                              headers: {
+                                "Content-Type": "application/json",
+                              },
+                              body: JSON.stringify({
+                                checkInDate: format(range.from, "yyyy-MM-dd"),
+                                checkOutDate: format(range.to, "yyyy-MM-dd"),
+                                guestName: guestDetails.name,
+                                guestEmail: guestDetails.email,
+                                guestPhone: guestDetails.phone,
+                                adults: guestDetails.adults,
+                                childrenUnder12: guestDetails.childrenUnder12,
+                                totalAmount: breakdown.total,
+                                weekdayNights: breakdown.weekdayNights,
+                                weekendNights: breakdown.weekendNights,
+                                cleaningFee: breakdown.cleaningFee,
+                                occupancyFee: breakdown.occupancyFee,
+                              }),
+                            });
+
+                            const data = await response.json();
+
+                            if (!response.ok) {
+                              throw new Error(data.error || "Failed to create checkout session");
+                            }
+
+                            // Redirect to Stripe Checkout
+                            if (data.url) {
+                              window.location.href = data.url;
+                            }
+                          } catch (error: any) {
+                            console.error("Checkout error:", error);
+                            alert(
+                              error.message ||
+                                "Failed to proceed to checkout. Please try again."
+                            );
+                            setIsProcessingCheckout(false);
+                          }
                         }}
                       >
-                        Proceed to Checkout
+                        {isProcessingCheckout ? "Processing..." : "Proceed to Checkout"}
                       </button>
                     </div>
                   </div>
