@@ -138,6 +138,7 @@ export async function POST(request: NextRequest) {
       phone_number_collection: {
         enabled: true,
       },
+      allow_promotion_codes: true,
     });
 
     return NextResponse.json({
