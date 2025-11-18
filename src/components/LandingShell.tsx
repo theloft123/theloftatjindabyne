@@ -159,7 +159,7 @@ export function LandingShell() {
           <PhotoGallery photos={content.gallery} />
           <PropertyDetails details={content.details} />
           <TermsAndRules />
-          <BookingPanel bookings={content.bookings} />
+          <BookingPanel bookings={content.bookings} reservations={content.reservations} />
         </main>
         <footer className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-sm text-slate-500 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">

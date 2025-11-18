@@ -52,9 +52,10 @@ type StayBreakdown = {
 
 type BookingPanelProps = {
   bookings: SiteContent["bookings"];
+  reservations: SiteContent["reservations"];
 };
 
-export function BookingPanel({ bookings }: BookingPanelProps) {
+export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   const [range, setRange] = useState<DateRange | undefined>();
   const { role } = useAccess();
   const [guestDetails, setGuestDetails] = useState({
@@ -176,17 +177,28 @@ export function BookingPanel({ bookings }: BookingPanelProps) {
   }, [bookings, range, guestDetails.adults, guestDetails.childrenUnder12]);
 
   const disabledDays = useMemo(() => {
+    // Manual blocked dates
     const blocked = bookings.blockedDates.flatMap(({ start, end }) => {
       const startDate = new Date(start);
       const endDate = new Date(end);
       return eachDayOfInterval({ start: startDate, end: endDate });
     });
 
+    // Blocked dates from confirmed reservations
+    const reservationBlocked = reservations
+      .filter((res) => res.status === "confirmed" || res.status === "pending")
+      .flatMap((res) => {
+        const checkIn = new Date(res.check_in_date);
+        const checkOut = new Date(res.check_out_date);
+        return eachDayOfInterval({ start: checkIn, end: addDays(checkOut, -1) });
+      });
+
     return [
       { before: startOfToday() },
       ...blocked,
+      ...reservationBlocked,
     ];
-  }, [bookings.blockedDates]);
+  }, [bookings.blockedDates, reservations]);
 
   return (
     <section
