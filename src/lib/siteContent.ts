@@ -53,6 +53,13 @@ export type SiteContent = {
       perAdultRate: number;
       description?: string;
     };
+    panelText?: {
+      eyebrow: string;
+      heading: string;
+      description: string;
+      detail1: string;
+      detail2: string;
+    };
   };
   reservations: Array<{
     id: string;
@@ -194,6 +201,13 @@ const defaultContent: SiteContent = {
       maxOccupancy: 8,
       perAdultRate: 50,
       description: "Base rate includes 2 guests. Additional adults (12+) charged per night.",
+    },
+    panelText: {
+      eyebrow: "Availability & Pricing",
+      heading: "Plan your stay",
+      description: "Select your arrival and departure dates to view the current rate. Weekends attract a premium, while longer mid-week stays are rewarded with our best nightly pricing.",
+      detail1: "Self check-in from 3:00pm, check-out by 10:00am",
+      detail2: "Rates include all linen, cleaning fee, and local taxes",
     },
   },
   reservations: [],

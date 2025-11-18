@@ -37,7 +37,7 @@ const CALENDAR_CLASS_NAMES = {
     "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_end: "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_middle: "bg-sky-100 text-slate-900 hover:bg-sky-200",
-  day_disabled: "cursor-not-allowed bg-red-100 text-red-500 line-through font-bold hover:bg-red-200 [&:not(.rdp-day_outside)]:relative [&:not(.rdp-day_outside)]:after:content-['✕'] [&:not(.rdp-day_outside)]:after:absolute [&:not(.rdp-day_outside)]:after:inset-0 [&:not(.rdp-day_outside)]:after:flex [&:not(.rdp-day_outside)]:after:items-center [&:not(.rdp-day_outside)]:after:justify-center [&:not(.rdp-day_outside)]:after:text-red-600 [&:not(.rdp-day_outside)]:after:text-xl [&:not(.rdp-day_outside)]:after:font-black [&:not(.rdp-day_outside)]:after:pointer-events-none",
+  day_disabled: "cursor-not-allowed bg-red-200 text-red-700 line-through decoration-2 decoration-red-600 font-bold hover:bg-red-300 [&:not(.rdp-day_outside)]:opacity-100",
 } as const;
 
 type StayBreakdown = {
@@ -72,6 +72,15 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   // Store input values as strings to allow proper editing/backspace
   const [adultsInput, setAdultsInput] = useState("2");
   const [childrenInput, setChildrenInput] = useState("0");
+
+  // Fallback for panelText if not yet in database
+  const panelText = bookings.panelText || {
+    eyebrow: "Availability & Pricing",
+    heading: "Plan your stay",
+    description: "Select your arrival and departure dates to view the current rate. Weekends attract a premium, while longer mid-week stays are rewarded with our best nightly pricing.",
+    detail1: "Self check-in from 3:00pm, check-out by 10:00am",
+    detail2: "Rates include all linen, cleaning fee, and local taxes",
+  };
 
   useEffect(() => {
     const checkMobile = () => {
@@ -198,20 +207,18 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
 
   const disabledDays = useMemo(() => {
     // Manual blocked dates
-    const blocked = bookings.blockedDates.flatMap(({ start, end }) => {
-      const startDate = new Date(start);
-      const endDate = new Date(end);
-      return eachDayOfInterval({ start: startDate, end: endDate });
-    });
+    const blocked = bookings.blockedDates.map(({ start, end }) => ({
+      from: new Date(start),
+      to: new Date(end),
+    }));
 
     // Blocked dates from confirmed reservations
     const reservationBlocked = reservations
       .filter((res) => res.status === "confirmed" || res.status === "pending")
-      .flatMap((res) => {
-        const checkIn = new Date(res.check_in_date);
-        const checkOut = new Date(res.check_out_date);
-        return eachDayOfInterval({ start: checkIn, end: addDays(checkOut, -1) });
-      });
+      .map((res) => ({
+        from: new Date(res.check_in_date),
+        to: addDays(new Date(res.check_out_date), -1),
+      }));
 
     return [
       { before: startOfToday() },
@@ -228,20 +235,18 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
       <div className="flex flex-col gap-6 md:flex-row md:items-start">
         <div className="md:max-w-sm">
           <p className="text-sm uppercase tracking-[0.3em] text-slate-500">
-            Availability & Pricing
+            {panelText.eyebrow}
           </p>
           <h2 className="mt-3 text-3xl font-semibold tracking-tight text-slate-900">
-            Plan your stay
+            {panelText.heading}
           </h2>
           <p className="mt-3 text-base leading-7 text-slate-600">
-            Select your arrival and departure dates to view the current rate.
-            Weekends attract a premium, while longer mid-week stays are rewarded
-            with our best nightly pricing.
+            {panelText.description}
           </p>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
             <li>• Minimum stay of {bookings.minimumNights} nights</li>
-            <li>• Self check-in from 3:00pm, check-out by 10:00am</li>
-            <li>• Rates include all linen, cleaning fee, and local taxes</li>
+            {panelText.detail1 && <li>• {panelText.detail1}</li>}
+            {panelText.detail2 && <li>• {panelText.detail2}</li>}
           </ul>
         </div>
         <div className="flex-1 space-y-6">
@@ -279,33 +284,44 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
               classNames={CALENDAR_CLASS_NAMES}
               onDayClick={(day, modifiers) => {
                 if (modifiers.disabled) {
-                  const isReservation = reservations.some((res) => {
+                  // Check if it's a past date
+                  const today = startOfToday();
+                  if (day < today) {
+                    alert("⚠️ Cannot book past dates.\n\nPlease select a date from today onwards.");
+                    return;
+                  }
+
+                  // Check if it's a reservation
+                  const conflictingReservation = reservations.find((res) => {
                     if (res.status !== "confirmed" && res.status !== "pending") return false;
                     const checkIn = new Date(res.check_in_date);
                     const checkOut = new Date(res.check_out_date);
                     return day >= checkIn && day < checkOut;
                   });
                   
-                  if (isReservation) {
+                  if (conflictingReservation) {
+                    const checkIn = format(new Date(conflictingReservation.check_in_date), "MMM d, yyyy");
+                    const checkOut = format(new Date(conflictingReservation.check_out_date), "MMM d, yyyy");
+                    alert(`⚠️ This date is already booked!\n\nAnother guest has a reservation from ${checkIn} to ${checkOut}.\n\nPlease choose different dates.`);
                     setBlockedDateMessage("This date is unavailable - already booked by another guest.");
                   } else {
+                    // Check if it's an admin-blocked date
+                    const isAdminBlocked = bookings.blockedDates.some((blocked) => {
+                      const start = new Date(blocked.start);
+                      const end = new Date(blocked.end);
+                      return day >= start && day <= end;
+                    });
+
+                    if (isAdminBlocked) {
+                      alert("⚠️ This date is not available for booking.\n\nThe property owner has blocked this period.\n\nPlease choose different dates.");
+                    } else {
+                      alert("⚠️ This date is not available for booking.\n\nPlease choose different dates.");
+                    }
                     setBlockedDateMessage("This date is not available for booking.");
                   }
                 }
               }}
             />
-            <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-600">
-              <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full bg-sky-500"></div>
-                <span>Your selected dates</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <div className="relative h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
-                  <span className="text-red-600 font-black text-base">✕</span>
-                </div>
-                <span>Unavailable (already booked)</span>
-              </div>
-            </div>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">
             {breakdown && !hasConflict ? (

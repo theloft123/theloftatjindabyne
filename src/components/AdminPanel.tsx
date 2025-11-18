@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAccess } from "@/context/AccessContext";
 import { useSiteContent } from "@/context/SiteContentContext";
+import { AdminBookingsManager } from "@/components/AdminBookingsManager";
 import type { SiteContent } from "@/lib/siteContent";
 
 const SECTION_CLASS = "rounded-3xl border border-slate-200 bg-white p-6 shadow-sm";
@@ -23,10 +24,17 @@ export function AdminPanel() {
     adminConfirm: "",
     currentAdmin: "",
   });
+  
+  // Store raw input strings to allow proper editing
+  const [customRatesInput, setCustomRatesInput] = useState("");
+  const [blockedDatesInput, setBlockedDatesInput] = useState("");
 
   useEffect(() => {
     if (content) {
       setDraft(content);
+      // Initialize input strings from content
+      setCustomRatesInput(formatCustomRates(content.bookings.customRates || []));
+      setBlockedDatesInput(formatBlockedDates(content.bookings.blockedDates));
     }
   }, [content]);
 
@@ -143,6 +151,8 @@ export function AdminPanel() {
           </div>
         </div>
       </div>
+
+      <AdminBookingsManager />
 
       {draft && (
         <section className={SECTION_CLASS}>
@@ -476,19 +486,32 @@ export function AdminPanel() {
                 Custom rate periods
               </label>
               <p className="mt-2 text-xs text-slate-500">
-                Define special pricing for specific date ranges (holidays, peak season, etc.). Enter one per line: YYYY-MM-DD to YYYY-MM-DD | $rate | label
+                Define special pricing for date ranges (holidays, peak season). Format: <strong>YYYY-MM-DD to YYYY-MM-DD | rate | label</strong>
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Example: 2025-12-20 to 2026-01-10 | 750 | Christmas/New Year Peak
               </p>
               <textarea
-                className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 font-mono text-sm"
                 rows={6}
                 placeholder="2025-12-20 to 2026-01-10 | 750 | Christmas/New Year Peak"
-                value={formatCustomRates(draft.bookings.customRates || [])}
-                onChange={(event) =>
+                value={customRatesInput}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setCustomRatesInput(value); // Always update display value
+                  
+                  // Parse and update draft for real-time validation
                   handleContentChange("bookings", {
                     ...draft.bookings,
-                    customRates: parseCustomRates(event.target.value),
-                  })
-                }
+                    customRates: parseCustomRates(value),
+                  });
+                }}
+                onBlur={(event) => {
+                  // On blur, format the parsed rates back to ensure consistency
+                  const parsed = parseCustomRates(event.target.value);
+                  const formatted = formatCustomRates(parsed);
+                  setCustomRatesInput(formatted);
+                }}
               />
             </div>
             <div>
@@ -496,18 +519,32 @@ export function AdminPanel() {
                 Blocked date ranges
               </label>
               <p className="mt-2 text-xs text-slate-500">
-                Enter one range per line in YYYY-MM-DD to YYYY-MM-DD format. Guests can’t select blocked nights.
+                Block dates from guest bookings. Enter one range per line using the format: <strong>YYYY-MM-DD to YYYY-MM-DD</strong>
+              </p>
+              <p className="mt-1 text-xs text-slate-400">
+                Example: 2025-12-20 to 2025-12-31 | Christmas maintenance (optional note)
               </p>
               <textarea
-                className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                className="mt-3 w-full rounded-2xl border border-slate-200 px-4 py-3 font-mono text-sm"
                 rows={6}
-                value={formatBlockedDates(draft.bookings.blockedDates)}
-                onChange={(event) =>
+                placeholder="2025-12-20 to 2025-12-31 | Holiday closure"
+                value={blockedDatesInput}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setBlockedDatesInput(value); // Always update display value
+                  
+                  // Parse and update draft for real-time validation
                   handleContentChange("bookings", {
                     ...draft.bookings,
-                    blockedDates: parseBlockedDates(event.target.value),
-                  })
-                }
+                    blockedDates: parseBlockedDates(value),
+                  });
+                }}
+                onBlur={(event) => {
+                  // On blur, format the parsed dates back to ensure consistency
+                  const parsed = parseBlockedDates(event.target.value);
+                  const formatted = formatBlockedDates(parsed);
+                  setBlockedDatesInput(formatted);
+                }}
               />
             </div>
           </div>
@@ -616,6 +653,128 @@ export function AdminPanel() {
           </div>
         </section>
       )}
+
+      {draft && (() => {
+        // Ensure panelText exists with defaults
+        const currentPanelText = draft.bookings.panelText || {
+          eyebrow: "Availability & Pricing",
+          heading: "Plan your stay",
+          description: "Select your arrival and departure dates to view the current rate. Weekends attract a premium, while longer mid-week stays are rewarded with our best nightly pricing.",
+          detail1: "Self check-in from 3:00pm, check-out by 10:00am",
+          detail2: "Rates include all linen, cleaning fee, and local taxes",
+        };
+
+        return (
+          <section className={SECTION_CLASS}>
+            <h3 className="text-base font-semibold text-slate-900">Booking panel text</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Customize the text shown in the availability & pricing section of your booking panel.
+            </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Eyebrow text
+                </label>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  placeholder="Availability & Pricing"
+                  value={currentPanelText.eyebrow}
+                  onChange={(e) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      panelText: {
+                        ...currentPanelText,
+                        eyebrow: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Heading
+                </label>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  placeholder="Plan your stay"
+                  value={currentPanelText.heading}
+                  onChange={(e) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      panelText: {
+                        ...currentPanelText,
+                        heading: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Description
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={3}
+                  placeholder="Select your arrival and departure dates to view the current rate..."
+                  value={currentPanelText.description}
+                  onChange={(e) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      panelText: {
+                        ...currentPanelText,
+                        description: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Extra detail 1 (optional)
+                </label>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  placeholder="Self check-in from 3:00pm, check-out by 10:00am"
+                  value={currentPanelText.detail1 || ""}
+                  onChange={(e) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      panelText: {
+                        ...currentPanelText,
+                        detail1: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Extra detail 2 (optional)
+                </label>
+                <input
+                  type="text"
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  placeholder="Rates include all linen, cleaning fee, and local taxes"
+                  value={currentPanelText.detail2 || ""}
+                  onChange={(e) =>
+                    handleContentChange("bookings", {
+                      ...draft.bookings,
+                      panelText: {
+                        ...currentPanelText,
+                        detail2: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       <div className={SECTION_CLASS}>
         <div className="flex flex-col gap-3">
@@ -769,8 +928,9 @@ function parseBlockedDates(value: string): SiteContent["bookings"]["blockedDates
     .filter(Boolean)
     .map((line) => {
       const [range, note] = line.split("|").map((part) => part.trim());
+      // Split on " to " only (not on hyphens, which are part of the date format)
       const [start, end] = range
-        .split(/to|-/i)
+        .split(/\s+to\s+/i)
         .map((part) => part.trim())
         .filter(Boolean);
 
@@ -803,8 +963,9 @@ function parseCustomRates(value: string): SiteContent["bookings"]["customRates"]
       if (parts.length < 3) return null;
 
       const [range, rateStr, label] = parts;
+      // Split on " to " with spaces (consistent with blocked dates)
       const [startDate, endDate] = range
-        .split(/to/i)
+        .split(/\s+to\s+/i)
         .map((part) => part.trim())
         .filter(Boolean);
 

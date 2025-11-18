@@ -17,6 +17,7 @@ export type CreateBookingInput = {
   stripe_payment_intent_id?: string;
   stripe_customer_id?: string;
   notes?: string;
+  status?: BookingStatus;
 };
 
 /**
@@ -30,6 +31,7 @@ export async function checkDateAvailability(
   const content = await getSiteContent();
   const activeStatuses: BookingStatus[] = ["pending", "confirmed", "completed"];
 
+  // Check existing reservations
   const conflicting = content.reservations.filter((reservation: Reservation) => {
     if (excludeReservationId && reservation.id === excludeReservationId) {
       return false;
@@ -44,8 +46,16 @@ export async function checkDateAvailability(
     );
   });
 
+  // Also check manually blocked dates from admin panel
+  const hasBlockedDateConflict = content.bookings.blockedDates.some((blocked) => {
+    return (
+      blocked.start <= checkOut &&
+      blocked.end >= checkIn
+    );
+  });
+
   return {
-    available: conflicting.length === 0,
+    available: conflicting.length === 0 && !hasBlockedDateConflict,
     conflictingReservations: conflicting,
   };
 }
@@ -78,7 +88,7 @@ export async function createBooking(input: CreateBookingInput): Promise<Reservat
     weekday_nights: input.weekday_nights,
     weekend_nights: input.weekend_nights,
     cleaning_fee: input.cleaning_fee,
-    status: "pending",
+    status: input.status || "pending",
     stripe_payment_intent_id: input.stripe_payment_intent_id,
     stripe_customer_id: input.stripe_customer_id,
     notes: input.notes,

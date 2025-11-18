@@ -14,6 +14,7 @@ export function LandingShell() {
   const { content, loading, error } = useSiteContent();
   const { role, clearAccess } = useAccess();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [hideWebsiteContent, setHideWebsiteContent] = useState(false);
 
   if (loading) {
     return (
@@ -148,40 +149,55 @@ export function LandingShell() {
       <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 py-8 md:px-10 md:py-20 lg:gap-20">
         {role === "admin" && (
           <div className="rounded-3xl border border-sky-200 bg-sky-50 px-6 py-4 text-sky-700">
-            <p className="text-sm font-semibold">Admin mode enabled.</p>
-            <p className="text-xs">
-              Any changes you make below are saved to Supabase and become visible to guests immediately.
-            </p>
-          </div>
-        )}
-        <main className="flex flex-col gap-16 lg:gap-20">
-          <Hero hero={content.hero} details={content.details} />
-          <PhotoGallery photos={content.gallery} />
-          <PropertyDetails details={content.details} />
-          <TermsAndRules />
-          <BookingPanel bookings={content.bookings} reservations={content.reservations} />
-        </main>
-        <footer className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-sm text-slate-500 shadow-sm">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <p>
-              © {new Date().getFullYear()} The Loft @ Jindabyne. All rights reserved.
-            </p>
-            <div className="flex flex-wrap items-center gap-4">
-              <a
-                href="mailto:jack.francis.aus@gmail.com"
-                className="font-semibold text-slate-700 hover:text-slate-900"
+            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <p className="text-sm font-semibold">Admin mode enabled.</p>
+                <p className="text-xs">
+                  Any changes you make below are saved to Supabase and become visible to guests immediately.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setHideWebsiteContent(!hideWebsiteContent)}
+                className="whitespace-nowrap rounded-full border border-sky-300 bg-white px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-sky-700 hover:bg-sky-100"
               >
-                jack.francis.aus@gmail.com
-              </a>
-              <a
-                href="tel:+61497162289"
-                className="font-semibold text-slate-700 hover:text-slate-900"
-              >
-                +61 497 162 289
-              </a>
+                {hideWebsiteContent ? "Show" : "Hide"} Website Content
+              </button>
             </div>
           </div>
-        </footer>
+        )}
+        {!hideWebsiteContent && (
+          <>
+            <main className="flex flex-col gap-16 lg:gap-20">
+              <Hero hero={content.hero} details={content.details} />
+              <PhotoGallery photos={content.gallery} />
+              <PropertyDetails details={content.details} />
+              <TermsAndRules />
+              <BookingPanel bookings={content.bookings} reservations={content.reservations} />
+            </main>
+            <footer className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-sm text-slate-500 shadow-sm">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <p>
+                  © {new Date().getFullYear()} The Loft @ Jindabyne. All rights reserved.
+                </p>
+                <div className="flex flex-wrap items-center gap-4">
+                  <a
+                    href="mailto:jack.francis.aus@gmail.com"
+                    className="font-semibold text-slate-700 hover:text-slate-900"
+                  >
+                    jack.francis.aus@gmail.com
+                  </a>
+                  <a
+                    href="tel:+61497162289"
+                    className="font-semibold text-slate-700 hover:text-slate-900"
+                  >
+                    +61 497 162 289
+                  </a>
+                </div>
+              </div>
+            </footer>
+          </>
+        )}
         {role === "admin" && <AdminPanel />}
       </div>
     </div>

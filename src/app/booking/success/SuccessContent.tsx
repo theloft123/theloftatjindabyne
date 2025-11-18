@@ -70,9 +70,9 @@ export function SuccessContent() {
             </p>
           <Link
             href="/"
-            className="mt-8 inline-block rounded-full bg-slate-900 px-8 py-3 text-base font-bold uppercase tracking-wide text-white transition hover:bg-slate-800"
+            className="mt-8 inline-block rounded-full bg-sky-600 px-8 py-3 text-base font-bold uppercase tracking-wide text-white transition hover:bg-sky-700"
           >
-            Return Home
+            Return to Home
           </Link>
           </div>
         </div>
@@ -161,7 +161,7 @@ export function SuccessContent() {
           </div>
           <Link
             href="/"
-            className="block w-full rounded-full bg-slate-900 px-8 py-3 text-center text-base font-bold uppercase tracking-wide text-white transition hover:bg-slate-800"
+            className="block w-full rounded-full bg-sky-600 px-8 py-3 text-center text-base font-bold uppercase tracking-wide text-white transition hover:bg-sky-700"
           >
             Return to Home
           </Link>
