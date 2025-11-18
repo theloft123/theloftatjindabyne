@@ -134,7 +134,6 @@ export async function POST(request: NextRequest) {
         cleaningFee: cleaningFee.toString(),
         occupancyFee: (occupancyFee || 0).toString(),
       },
-      customer_email: guestEmail,
       billing_address_collection: "required",
       phone_number_collection: {
         enabled: true,
