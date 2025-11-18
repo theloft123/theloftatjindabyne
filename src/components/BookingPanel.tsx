@@ -37,7 +37,7 @@ const CALENDAR_CLASS_NAMES = {
     "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_end: "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_middle: "bg-sky-100 text-slate-900 hover:bg-sky-200",
-  day_disabled: "cursor-not-allowed text-slate-300 line-through opacity-40 hover:bg-transparent",
+  day_disabled: "cursor-not-allowed !bg-red-50 text-red-400 line-through font-bold opacity-60 hover:!bg-red-100 relative after:content-['✕'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-red-500 after:text-lg after:font-bold",
 } as const;
 
 type StayBreakdown = {
@@ -68,6 +68,7 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   const [showGuestForm, setShowGuestForm] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
+  const [blockedDateMessage, setBlockedDateMessage] = useState<string | null>(null);
   // Store input values as strings to allow proper editing/backspace
   const [adultsInput, setAdultsInput] = useState("2");
   const [childrenInput, setChildrenInput] = useState("0");
@@ -226,15 +227,64 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
         </div>
         <div className="flex-1 space-y-6">
           <div className="rounded-3xl border border-slate-200 p-4 md:p-6 shadow-inner bg-white overflow-x-auto">
+            {blockedDateMessage && (
+              <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                <p className="font-semibold">⚠️ {blockedDateMessage}</p>
+                <button
+                  onClick={() => setBlockedDateMessage(null)}
+                  className="mt-2 text-xs underline hover:no-underline"
+                >
+                  Dismiss
+                </button>
+              </div>
+            )}
             <DayPicker
               mode="range"
               numberOfMonths={isMobile ? 1 : 2}
               selected={range}
-              onSelect={setRange}
+              onSelect={(newRange) => {
+                setRange(newRange);
+                // Clear message when user selects new dates
+                if (blockedDateMessage) {
+                  setBlockedDateMessage(null);
+                }
+              }}
               disabled={disabledDays}
               weekStartsOn={1}
               classNames={CALENDAR_CLASS_NAMES}
+              onDayClick={(day, modifiers) => {
+                if (modifiers.disabled) {
+                  const isReservation = reservations.some((res) => {
+                    if (res.status !== "confirmed" && res.status !== "pending") return false;
+                    const checkIn = new Date(res.check_in_date);
+                    const checkOut = new Date(res.check_out_date);
+                    return day >= checkIn && day < checkOut;
+                  });
+                  
+                  if (isReservation) {
+                    setBlockedDateMessage("This date is unavailable - already booked by another guest.");
+                  } else {
+                    setBlockedDateMessage("This date is not available for booking.");
+                  }
+                }
+              }}
             />
+            <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-600">
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full border-2 border-slate-400 bg-white"></div>
+                <span>Today</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-6 w-6 rounded-full bg-sky-500"></div>
+                <span>Selected</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="relative h-6 w-6 rounded-full bg-red-50">
+                  <span className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-sm">✕</span>
+                </div>
+                <span>Unavailable</span>
+              </div>
+            </div>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">
             {breakdown ? (
