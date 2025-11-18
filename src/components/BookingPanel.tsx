@@ -37,7 +37,7 @@ const CALENDAR_CLASS_NAMES = {
     "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_end: "bg-sky-500 text-slate-950 hover:bg-sky-400",
   day_range_middle: "bg-sky-100 text-slate-900 hover:bg-sky-200",
-  day_disabled: "cursor-not-allowed !bg-red-50 text-red-400 line-through font-bold opacity-60 hover:!bg-red-100 relative after:content-['✕'] after:absolute after:inset-0 after:flex after:items-center after:justify-center after:text-red-500 after:text-lg after:font-bold",
+  day_disabled: "cursor-not-allowed bg-red-100 text-red-500 line-through font-bold hover:bg-red-200 [&:not(.rdp-day_outside)]:relative [&:not(.rdp-day_outside)]:after:content-['✕'] [&:not(.rdp-day_outside)]:after:absolute [&:not(.rdp-day_outside)]:after:inset-0 [&:not(.rdp-day_outside)]:after:flex [&:not(.rdp-day_outside)]:after:items-center [&:not(.rdp-day_outside)]:after:justify-center [&:not(.rdp-day_outside)]:after:text-red-600 [&:not(.rdp-day_outside)]:after:text-xl [&:not(.rdp-day_outside)]:after:font-black [&:not(.rdp-day_outside)]:after:pointer-events-none",
 } as const;
 
 type StayBreakdown = {
@@ -271,18 +271,14 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
             />
             <div className="mt-4 flex flex-wrap gap-4 text-xs text-slate-600">
               <div className="flex items-center gap-2">
-                <div className="h-6 w-6 rounded-full border-2 border-slate-400 bg-white"></div>
-                <span>Today</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <div className="h-6 w-6 rounded-full bg-sky-500"></div>
-                <span>Selected</span>
+                <span>Your selected dates</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="relative h-6 w-6 rounded-full bg-red-50">
-                  <span className="absolute inset-0 flex items-center justify-center text-red-500 font-bold text-sm">✕</span>
+                <div className="relative h-6 w-6 rounded-full bg-red-100 flex items-center justify-center">
+                  <span className="text-red-600 font-black text-base">✕</span>
                 </div>
-                <span>Unavailable</span>
+                <span>Unavailable (already booked)</span>
               </div>
             </div>
           </div>
