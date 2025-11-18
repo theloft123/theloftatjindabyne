@@ -82,6 +82,25 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Check if selected range overlaps with booked dates
+  const hasConflict = useMemo(() => {
+    if (!range?.from || !range?.to) return false;
+    
+    const selectedDates = eachDayOfInterval({
+      start: range.from,
+      end: addDays(range.to, -1),
+    });
+
+    return selectedDates.some(date => {
+      return reservations.some((res) => {
+        if (res.status !== "confirmed" && res.status !== "pending") return false;
+        const checkIn = new Date(res.check_in_date);
+        const checkOut = new Date(res.check_out_date);
+        return date >= checkIn && date < checkOut;
+      });
+    });
+  }, [range, reservations]);
+
   const breakdown = useMemo(() => {
     if (!range?.from || !range?.to) {
       return null;
@@ -226,6 +245,12 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
           </ul>
         </div>
         <div className="flex-1 space-y-6">
+          {hasConflict && (
+            <div className="rounded-2xl border-2 border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800">
+              <p className="font-bold">⚠️ Dates Not Available</p>
+              <p className="mt-1">Your selection includes dates that are already booked. Please choose different dates.</p>
+            </div>
+          )}
           <div className="rounded-3xl border border-slate-200 p-4 md:p-6 shadow-inner bg-white overflow-x-auto">
             {blockedDateMessage && (
               <div className="mb-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -283,7 +308,7 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
             </div>
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">
-            {breakdown ? (
+            {breakdown && !hasConflict ? (
               <>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <div>
@@ -551,6 +576,23 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
                   </div>
                 )}
               </>
+            ) : hasConflict ? (
+              <div className="space-y-4 text-center text-slate-600">
+                <h3 className="text-base font-semibold text-red-700">
+                  ⚠️ Selected dates are unavailable
+                </h3>
+                <p className="text-sm leading-6">
+                  Your selection includes dates that are already booked by another guest.
+                  Please adjust your dates to see pricing and continue with your booking.
+                </p>
+                <button
+                  type="button"
+                  className="rounded-full border border-red-300 bg-red-50 px-4 py-2 text-xs font-semibold uppercase tracking-[0.3em] text-red-700 hover:bg-red-100"
+                  onClick={() => setRange(undefined)}
+                >
+                  Clear Selection
+                </button>
+              </div>
             ) : (
               <EmptyState bookings={bookings} role={role} />
             )}
