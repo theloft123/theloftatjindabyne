@@ -14,6 +14,8 @@ export type CreateBookingInput = {
   weekday_nights: number;
   weekend_nights: number;
   cleaning_fee: number;
+  adults: number;
+  children_under_12?: number;
   stripe_payment_intent_id?: string;
   stripe_customer_id?: string;
   notes?: string;
@@ -88,6 +90,8 @@ export async function createBooking(input: CreateBookingInput): Promise<Reservat
     weekday_nights: input.weekday_nights,
     weekend_nights: input.weekend_nights,
     cleaning_fee: input.cleaning_fee,
+    adults: input.adults,
+    children_under_12: input.children_under_12,
     status: input.status || "pending",
     stripe_payment_intent_id: input.stripe_payment_intent_id,
     stripe_customer_id: input.stripe_customer_id,

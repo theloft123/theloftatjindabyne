@@ -72,6 +72,8 @@ export type SiteContent = {
     weekday_nights: number;
     weekend_nights: number;
     cleaning_fee: number;
+    adults?: number;
+    children_under_12?: number;
     status: "pending" | "confirmed" | "cancelled" | "completed";
     stripe_payment_intent_id?: string;
     stripe_customer_id?: string;

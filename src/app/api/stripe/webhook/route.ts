@@ -84,14 +84,14 @@ export async function POST(request: NextRequest) {
           weekday_nights: parseInt(weekdayNights, 10),
           weekend_nights: parseInt(weekendNights, 10),
           cleaning_fee: parseFloat(cleaningFee),
+          adults: parseInt(adults, 10),
+          children_under_12: parseInt(childrenUnder12, 10) || 0,
           stripe_payment_intent_id: paymentIntentId,
           stripe_customer_id: session.customer as string,
           status: "confirmed", // Payment succeeded, so booking is confirmed
-          notes: `Adults: ${adults}, Children (under 12): ${childrenUnder12}${
-            occupancyFee && parseFloat(occupancyFee) > 0
-              ? `, Occupancy Fee: $${occupancyFee}`
-              : ""
-          }`,
+          notes: occupancyFee && parseFloat(occupancyFee) > 0
+            ? `Occupancy Fee: $${occupancyFee}`
+            : undefined,
         });
 
         console.log("Booking created successfully:", booking.id);

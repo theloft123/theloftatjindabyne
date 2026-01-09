@@ -162,7 +162,48 @@ export function AdminBookingsManager() {
                       {booking.weekday_nights + booking.weekend_nights}
                     </td>
                     <td className="py-4 text-slate-700">
-                      {booking.notes?.match(/Adults: (\d+)/)?.[1] || "-"}
+                      {(() => {
+                        // Use structured data if available (new bookings)
+                        if (booking.adults !== undefined) {
+                          const totalGuests = booking.adults + (booking.children_under_12 || 0);
+                          return (
+                            <>
+                              {totalGuests}
+                              {booking.children_under_12 ? (
+                                <span className="ml-1 text-xs text-slate-500">
+                                  ({booking.adults}A, {booking.children_under_12}C)
+                                </span>
+                              ) : null}
+                            </>
+                          );
+                        }
+                        
+                        // Fallback: Parse from notes for old bookings
+                        if (booking.notes) {
+                          const adultsMatch = booking.notes.match(/Adults: (\d+)/);
+                          const childrenMatch = booking.notes.match(/Children \(under 12\): (\d+)/);
+                          
+                          if (adultsMatch) {
+                            const adults = parseInt(adultsMatch[1], 10);
+                            const children = childrenMatch ? parseInt(childrenMatch[1], 10) : 0;
+                            const totalGuests = adults + children;
+                            
+                            return (
+                              <>
+                                {totalGuests}
+                                {children > 0 ? (
+                                  <span className="ml-1 text-xs text-slate-500">
+                                    ({adults}A, {children}C)
+                                  </span>
+                                ) : null}
+                              </>
+                            );
+                          }
+                        }
+                        
+                        // No guest data available
+                        return "-";
+                      })()}
                     </td>
                     <td className="py-4 font-medium text-slate-900">
                       ${booking.total_amount}
