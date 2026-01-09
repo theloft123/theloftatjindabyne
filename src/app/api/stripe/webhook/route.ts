@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe";
 import { createBooking } from "@/lib/bookings";
+import {
+  sendBookingConfirmationToGuest,
+  sendBookingNotificationToHost,
+} from "@/lib/emails";
 import Stripe from "stripe";
 
 /**
@@ -96,8 +100,20 @@ export async function POST(request: NextRequest) {
 
         console.log("Booking created successfully:", booking.id);
 
-        // TODO: Send confirmation email to guest
-        // TODO: Send notification to property owner
+        // Send confirmation emails
+        try {
+          await sendBookingConfirmationToGuest(booking);
+        } catch (emailError) {
+          console.error("Failed to send guest confirmation email:", emailError);
+          // Don't fail the webhook if email fails
+        }
+
+        try {
+          await sendBookingNotificationToHost(booking);
+        } catch (emailError) {
+          console.error("Failed to send host notification email:", emailError);
+          // Don't fail the webhook if email fails
+        }
 
         break;
       }

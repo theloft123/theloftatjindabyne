@@ -204,16 +204,32 @@ The integration is configured for **AUD (Australian Dollars)**. To change this:
 - Check webhook secret is correct
 - Look at server logs for database errors
 
-## Email Notifications (TODO)
+## Email Notifications ✅
 
-Currently, the webhook handler includes TODO comments for:
-- Sending confirmation emails to guests
-- Sending notifications to property owners
+Email notifications are now fully implemented using [Resend](https://resend.com).
 
-Consider integrating:
-- [Resend](https://resend.com) - Modern email API
-- [SendGrid](https://sendgrid.com) - Established email service
-- [Postmark](https://postmarkapp.com) - Transactional emails
+### Setup
+
+1. Create a [Resend account](https://resend.com) (free tier: 3,000 emails/month)
+2. Get your API key from the Resend dashboard
+3. Add to your `.env.local`:
+   ```bash
+   RESEND_KEY=re_your_api_key_here
+   OWNER_EMAIL=your-email@example.com
+   RESEND_FROM_EMAIL=The Loft @ Jindabyne <noreply@theloftatjindabyne.com.au>  # Optional
+   ```
+   
+   **Note:** The `RESEND_FROM_EMAIL` must use a verified domain in Resend. For testing, you can use Resend's default domain or verify your own domain in the Resend dashboard.
+
+### Email Types
+
+The system automatically sends:
+- **Guest Confirmation Email** - Sent when payment succeeds, includes booking details and cancellation link
+- **Host Notification Email** - Sent to property owner when a new booking is confirmed
+- **Guest Cancellation Email** - Sent when booking is cancelled, includes refund status
+- **Host Cancellation Notification** - Sent to property owner when a booking is cancelled
+
+All emails are sent automatically via webhooks and booking deletion routes. Email failures are logged but don't block the main operations.
 
 ## Support
 

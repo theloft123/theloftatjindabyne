@@ -10,6 +10,7 @@ A password-protected rental property microsite showcasing availability, pricing,
 - **Stripe Checkout integration** for secure payment processing
 - Dynamic pricing with weekday/weekend rates, custom date ranges, and occupancy fees
 - Webhook handling for automatic booking confirmation
+- **Email notifications** via Resend for booking confirmations, cancellations, and refunds
 - Supabase client for persisting bookings and content
 
 ### Tech Stack
@@ -19,6 +20,7 @@ A password-protected rental property microsite showcasing availability, pricing,
 - [React Day Picker](https://react-day-picker.dev/)
 - [Supabase JavaScript Client](https://supabase.com/docs/reference/javascript/start)
 - [Stripe](https://stripe.com) - Payment processing
+- [Resend](https://resend.com) - Transactional email service
 
 ### Getting Started
 Install dependencies:
@@ -42,6 +44,11 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
+
+# Email Notifications (Resend)
+RESEND_KEY=re_your_resend_api_key_here
+OWNER_EMAIL=your-email@example.com
+RESEND_FROM_EMAIL=The Loft @ Jindabyne <noreply@theloftatjindabyne.com.au>  # Optional: defaults to above
 ```
 test
 > **Security note:** Keep `.env.local` out of source control. Rotate the service-role key before deploying production workloads, restrict RLS policies accordingly, and replace the sample secrets before launch.
@@ -86,8 +93,8 @@ The site will be available at [http://localhost:3000](http://localhost:3000).
 ### Next Steps
 - ✅ ~~Connect the checkout CTA to a Stripe Checkout Session~~ **DONE!**
 - ✅ ~~Model bookings, blocked dates, and pricing tables in Supabase~~ **DONE!**
-- Set up Stripe webhooks for automatic booking confirmation (see [STRIPE_SETUP.md](./STRIPE_SETUP.md))
-- Add email notifications for booking confirmations
+- ✅ ~~Set up Stripe webhooks for automatic booking confirmation~~ **DONE!**
+- ✅ ~~Add email notifications for booking confirmations~~ **DONE!**
 - Replace the placeholder Unsplash imagery with high-resolution property photography
 - Configure deployment (Vercel or similar) and set environment variables in the hosting platform
 

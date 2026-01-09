@@ -159,6 +159,22 @@ export function SuccessContent() {
               <li>• Check-in from 3:00pm, check-out by 10:00am</li>
             </ul>
           </div>
+          {sessionData?.metadata?.bookingId && (
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500 mb-2">
+                Need to Cancel?
+              </p>
+              <p className="text-xs text-slate-600 mb-3">
+                You can cancel this booking and request a refund using the link below.
+              </p>
+              <Link
+                href={`/booking/cancel/${sessionData.metadata.bookingId}`}
+                className="text-xs text-red-600 underline hover:text-red-700"
+              >
+                Cancel this booking →
+              </Link>
+            </div>
+          )}
           <Link
             href="/"
             className="block w-full rounded-full bg-sky-600 px-8 py-3 text-center text-base font-bold uppercase tracking-wide text-white transition hover:bg-sky-700"
