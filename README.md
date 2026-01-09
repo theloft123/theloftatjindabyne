@@ -43,7 +43,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 ```
-
+test
 > **Security note:** Keep `.env.local` out of source control. Rotate the service-role key before deploying production workloads, restrict RLS policies accordingly, and replace the sample secrets before launch.
 
 ### Stripe Setup
