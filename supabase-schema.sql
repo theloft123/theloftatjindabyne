@@ -44,3 +44,14 @@ create trigger update_site_content_updated_at
 -- the schema. If you need more advanced querying later, you can create a separate
 -- bookings table and migrate the data.
 
+-- The bookings section of site_content includes:
+--   - blockedDates: Array of manually blocked date ranges
+--   - weekdayRate, weekendRate: Base pricing
+--   - cleaningFee: One-time fee per booking
+--   - minimumNights, maximumNights: Stay length limits
+--   - customRates: Special pricing for date ranges (holidays, peak season)
+--   - dayOfWeekRates: Override rates for specific days
+--   - occupancyPricing: Extra adult charges
+--   - panelText: Customizable booking panel text
+--   - maxAdvanceBookingMonths: Rolling limit on how far in advance guests can book (default: 9 months)
+

@@ -394,6 +394,32 @@ export function AdminPanel() {
                 }
               />
             </div>
+            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+              <h4 className="text-sm font-semibold text-amber-800">Advance booking limit</h4>
+              <p className="mt-1 text-xs text-amber-700">
+                Restrict how far in advance guests can book. Dates beyond this limit will be blocked.
+                Set to 0 for unlimited advance bookings.
+              </p>
+              <div className="mt-3">
+                <NumberField
+                  label="Maximum months in advance"
+                  suffix="months"
+                  value={draft.bookings.maxAdvanceBookingMonths ?? 0}
+                  onChange={(value) =>
+                    handleContentChange("bookings", { 
+                      ...draft.bookings, 
+                      maxAdvanceBookingMonths: value > 0 ? value : null 
+                    })
+                  }
+                />
+              </div>
+              {(draft.bookings.maxAdvanceBookingMonths ?? 0) > 0 && (
+                <p className="mt-2 text-xs text-amber-600">
+                  Guests can currently book up to {draft.bookings.maxAdvanceBookingMonths} months in advance
+                  (until {new Date(Date.now() + (draft.bookings.maxAdvanceBookingMonths ?? 0) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString('en-AU', { month: 'long', year: 'numeric' })})
+                </p>
+              )}
+            </div>
             <div>
               <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
                 Day-of-week rates (optional)

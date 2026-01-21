@@ -60,6 +60,8 @@ export type SiteContent = {
       detail1: string;
       detail2: string;
     };
+    /** Maximum months in advance guests can book (null = unlimited) */
+    maxAdvanceBookingMonths: number | null;
   };
   reservations: Array<{
     id: string;
@@ -211,6 +213,7 @@ const defaultContent: SiteContent = {
       detail1: "Self check-in from 3:00pm, check-out by 10:00am",
       detail2: "Rates include all linen, cleaning fee, and local taxes",
     },
+    maxAdvanceBookingMonths: 9,
   },
   reservations: [],
 };

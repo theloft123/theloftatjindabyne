@@ -2,6 +2,7 @@
 
 import {
   addDays,
+  addMonths,
   differenceInCalendarDays,
   eachDayOfInterval,
   format,
@@ -220,12 +221,26 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
         to: addDays(new Date(res.check_out_date), -1),
       }));
 
-    return [
-      { before: startOfToday() },
+    // Calculate max advance booking cutoff date
+    const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
+    const today = startOfToday();
+    const maxBookingDate = maxAdvanceMonths 
+      ? addMonths(today, maxAdvanceMonths)
+      : null;
+
+    const disabledList: Array<{ before?: Date; after?: Date; from?: Date; to?: Date }> = [
+      { before: today },
       ...blocked,
       ...reservationBlocked,
     ];
-  }, [bookings.blockedDates, reservations]);
+
+    // Add max advance booking restriction
+    if (maxBookingDate) {
+      disabledList.push({ after: maxBookingDate });
+    }
+
+    return disabledList;
+  }, [bookings.blockedDates, bookings.maxAdvanceBookingMonths, reservations]);
 
   return (
     <section
@@ -282,13 +297,25 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
               disabled={disabledDays}
               weekStartsOn={1}
               classNames={CALENDAR_CLASS_NAMES}
-              onDayClick={(day, modifiers) => {
+                onDayClick={(day, modifiers) => {
                 if (modifiers.disabled) {
                   // Check if it's a past date
                   const today = startOfToday();
                   if (day < today) {
                     alert("⚠️ Cannot book past dates.\n\nPlease select a date from today onwards.");
                     return;
+                  }
+
+                  // Check if it's beyond the max advance booking limit
+                  const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
+                  if (maxAdvanceMonths) {
+                    const maxBookingDate = addMonths(today, maxAdvanceMonths);
+                    if (day > maxBookingDate) {
+                      const limitDate = format(maxBookingDate, "MMMM d, yyyy");
+                      alert(`⚠️ Cannot book this far in advance.\n\nBookings are currently limited to ${maxAdvanceMonths} months ahead.\n\nThe latest available date is ${limitDate}.`);
+                      setBlockedDateMessage(`Bookings are limited to ${maxAdvanceMonths} months in advance.`);
+                      return;
+                    }
                   }
 
                   // Check if it's a reservation
