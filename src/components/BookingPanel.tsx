@@ -228,16 +228,14 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
       ? addMonths(today, maxAdvanceMonths)
       : null;
 
-    const disabledList: Array<{ before?: Date; after?: Date; from?: Date; to?: Date }> = [
+    // Build the disabled list - past dates and blocked ranges
+    const disabledList = [
       { before: today },
       ...blocked,
       ...reservationBlocked,
+      // Add max advance booking restriction if set
+      ...(maxBookingDate ? [{ after: maxBookingDate }] : []),
     ];
-
-    // Add max advance booking restriction
-    if (maxBookingDate) {
-      disabledList.push({ after: maxBookingDate });
-    }
 
     return disabledList;
   }, [bookings.blockedDates, bookings.maxAdvanceBookingMonths, reservations]);
