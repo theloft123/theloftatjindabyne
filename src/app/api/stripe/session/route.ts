@@ -21,12 +21,13 @@ export async function GET(request: NextRequest) {
 
     // Try to find the booking by email and check-in date
     let bookingId = null;
-    if (session.metadata?.guestEmail && session.metadata?.checkInDate) {
+    const metadata = session.metadata;
+    if (metadata?.guestEmail && metadata?.checkInDate) {
       const bookings = await getAllBookings();
       const booking = bookings.find(
         (b) =>
-          b.guest_email.toLowerCase() === session.metadata.guestEmail.toLowerCase() &&
-          b.check_in_date === session.metadata.checkInDate
+          b.guest_email.toLowerCase() === metadata.guestEmail.toLowerCase() &&
+          b.check_in_date === metadata.checkInDate
       );
       if (booking) {
         bookingId = booking.id;
