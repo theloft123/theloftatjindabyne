@@ -3,7 +3,7 @@
 A password-protected rental property microsite showcasing availability, pricing, photo gallery, and property highlights for The Loft @ Jindabyne.
 
 ### Features
-- Password gate for guest-only access (stores successful unlocks in `localStorage`)
+- Password gate for guest-only access (stores successful unlocks in `localStorage`) test
 - Admin mode with Supabase-backed content editing, pricing controls, and password rotation
 - Hero, gallery, and detailed amenities sections tailored to the property
 - Booking panel with date-range picker, minimum night enforcement, and weekday/weekend pricing breakdown
