@@ -545,3 +545,104 @@ export async function sendCheckInReminderToGuest(
     throw error;
   }
 }
+
+/**
+ * Send check-in reminder notification to host (1 week before)
+ */
+export async function sendCheckInReminderToHost(
+  booking: Reservation
+): Promise<void> {
+  if (!resend) {
+    console.warn("Resend not configured, skipping email");
+    return;
+  }
+
+  const checkInDate = format(new Date(booking.check_in_date), "EEEE, MMMM d, yyyy");
+  const checkOutDate = format(new Date(booking.check_out_date), "EEEE, MMMM d, yyyy");
+  const totalNights = booking.weekday_nights + booking.weekend_nights;
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: OWNER_EMAIL,
+      subject: `Upcoming Check-in (1 Week) - ${booking.guest_name} - ${checkInDate}`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Upcoming Check-in</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(to bottom right, #0891b2, #06b6d4); padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Upcoming Check-in</h1>
+            <p style="color: rgba(255,255,255,0.9); margin: 10px 0 0 0; font-size: 16px;">1 Week Away</p>
+          </div>
+          
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
+            <p style="font-size: 16px; margin-top: 0;">A guest is checking in one week from now. A reminder email has been sent to them with check-in details.</p>
+            
+            <div style="background: #f8fafc; border-left: 4px solid #0891b2; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #1e293b; font-size: 20px;">Guest Information</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Name:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;">${booking.guest_name}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Email:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;"><a href="mailto:${booking.guest_email}" style="color: #3b82f6;">${booking.guest_email}</a></td>
+                </tr>
+                ${booking.guest_phone ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Phone:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;"><a href="tel:${booking.guest_phone}" style="color: #3b82f6;">${booking.guest_phone}</a></td>
+                </tr>
+                ` : ''}
+              </table>
+            </div>
+            
+            <div style="background: #f8fafc; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #1e293b; font-size: 20px;">Booking Details</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Check-in:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;">${checkInDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Check-out:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;">${checkOutDate}</td>
+                </tr>
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Nights:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;">${totalNights} night${totalNights !== 1 ? 's' : ''}</td>
+                </tr>
+                ${booking.adults ? `
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Guests:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 500;">${booking.adults} adult${booking.adults !== 1 ? 's' : ''}${booking.children_under_12 ? `, ${booking.children_under_12} child${booking.children_under_12 !== 1 ? 'ren' : ''} (under 12)` : ''}</td>
+                </tr>
+                ` : ''}
+                <tr>
+                  <td style="padding: 8px 0; color: #64748b; font-weight: 600;">Total Amount:</td>
+                  <td style="padding: 8px 0; color: #1e293b; font-weight: 700; font-size: 18px;">$${booking.total_amount.toFixed(2)} AUD</td>
+                </tr>
+              </table>
+            </div>
+            
+            <div style="background: #f0fdf4; border: 1px solid #86efac; padding: 15px; margin: 25px 0; border-radius: 4px;">
+              <p style="margin: 0; color: #166534; font-weight: 600;">✓ Guest reminder email sent</p>
+              <p style="margin: 10px 0 0 0; color: #166534;">The guest has been sent their check-in details including the door code, WiFi password, and check-out instructions.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+    console.log(`Check-in reminder notification sent to ${OWNER_EMAIL}`);
+  } catch (error) {
+    console.error("Failed to send check-in reminder to host:", error);
+    throw error;
+  }
+}

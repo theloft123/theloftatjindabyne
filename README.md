@@ -32,7 +32,7 @@ Add a `.env.local` file in the project root:
 ```bash
 # App Passwords
 NEXT_PUBLIC_ACCESS_PASSWORD=theloft2025
-ADMIN_PANEL_PASSWORD=theloft-admin
+ADMIN_PANEL_PASSWORD=theloftadmin
 ADMIN_SESSION_SECRET=change-me-please
 
 # Supabase

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAllBookings } from "@/lib/bookings";
-import { sendCheckInReminderToGuest } from "@/lib/emails";
+import { sendCheckInReminderToGuest, sendCheckInReminderToHost } from "@/lib/emails";
 import { addDays, format, parseISO, startOfDay } from "date-fns";
 
 /**
@@ -41,16 +41,32 @@ export async function GET(request: NextRequest) {
     console.log(`Found ${bookingsToRemind.length} booking(s) to send reminders for`);
 
     // Send reminder emails
-    const results: { email: string; success: boolean; error?: string }[] = [];
+    const results: { email: string; type: string; success: boolean; error?: string }[] = [];
 
     for (const booking of bookingsToRemind) {
+      // Send to guest
       try {
         await sendCheckInReminderToGuest(booking);
-        results.push({ email: booking.guest_email, success: true });
+        results.push({ email: booking.guest_email, type: "guest", success: true });
       } catch (error: any) {
         console.error(`Failed to send reminder to ${booking.guest_email}:`, error);
         results.push({
           email: booking.guest_email,
+          type: "guest",
+          success: false,
+          error: error.message,
+        });
+      }
+
+      // Send to host
+      try {
+        await sendCheckInReminderToHost(booking);
+        results.push({ email: "host", type: "host", success: true });
+      } catch (error: any) {
+        console.error(`Failed to send host reminder:`, error);
+        results.push({
+          email: "host",
+          type: "host",
           success: false,
           error: error.message,
         });
