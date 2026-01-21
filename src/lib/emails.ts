@@ -409,3 +409,139 @@ export async function sendCancellationToHost(
     throw error;
   }
 }
+
+/**
+ * Send check-in reminder email to guest (1 week before)
+ */
+export async function sendCheckInReminderToGuest(
+  booking: Reservation
+): Promise<void> {
+  if (!resend) {
+    console.warn("Resend not configured, skipping email");
+    return;
+  }
+
+  const checkInDate = format(new Date(booking.check_in_date), "dd/MM/yyyy");
+  const checkOutDate = format(new Date(booking.check_out_date), "dd/MM/yyyy");
+  const totalNights = booking.weekday_nights + booking.weekend_nights;
+
+  try {
+    await resend.emails.send({
+      from: FROM_EMAIL,
+      to: booking.guest_email,
+      subject: `Your Stay at The Loft @ Jindabyne - Check-in Details`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Check-in Details</title>
+        </head>
+        <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(to bottom right, #1e293b, #334155); padding: 40px 20px; text-align: center; border-radius: 8px 8px 0 0;">
+            <h1 style="color: white; margin: 0; font-size: 28px;">Not Long Now!</h1>
+          </div>
+          
+          <div style="background: #ffffff; padding: 30px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
+            <p style="font-size: 16px; margin-top: 0;">Hello!</p>
+            
+            <p style="font-size: 16px;">Not long now until your stay at The Loft @ Jindabyne. Your check-in date is <strong>${checkInDate}</strong> with check-out on <strong>${checkOutDate}</strong>; staying a total of <strong>${totalNights} night${totalNights !== 1 ? 's' : ''}</strong>.</p>
+            
+            <p style="font-size: 16px;">A few quick notes for your stay:</p>
+            
+            <!-- Linen Section -->
+            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #92400e; font-size: 18px;">🛏️ Linen</h2>
+              <ul style="margin: 0; padding-left: 20px; color: #78350f;">
+                <li style="margin-bottom: 8px;"><strong>Don't forget</strong> to bring your own linen including sheets, pillowcases and towels!</li>
+                <li style="margin-bottom: 0;">Bedding configurations are listed on the <a href="${SITE_URL}" style="color: #b45309;">website</a></li>
+              </ul>
+            </div>
+            
+            <!-- Access Section -->
+            <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #1e40af; font-size: 18px;">🔑 Access</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600; width: 120px;">Check-in:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a;">1:00pm</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600;">Check-out:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a;">11:00am</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600;">Address:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a;">Unit 3, 28 Ingebyra Street, Jindabyne</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600;">Parking:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a;">The first 2 off street carparks are allocated to our unit</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600;">Entry:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a;">Head up the concrete stairs and you will see the front door to Unit 3</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #1e40af; font-weight: 600;">Door code:</td>
+                  <td style="padding: 6px 0; color: #1e3a8a; font-weight: 700; font-size: 18px;">1950</td>
+                </tr>
+              </table>
+            </div>
+            
+            <!-- Check-Out Section -->
+            <div style="background: #f8fafc; border-left: 4px solid #64748b; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #1e293b; font-size: 18px;">🧹 Check-Out</h2>
+              <p style="margin-top: 0; color: #475569;">Please clean the apartment before you leave. Cleaning products are under the sink in the kitchen and in the hallway cupboard:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #475569;">
+                <li style="margin-bottom: 6px;">Clean the main bathroom and toilet upstairs</li>
+                <li style="margin-bottom: 6px;">Wash bathmat, handtowels and tea towels. Place on the towel rail in the bathroom to dry.</li>
+                <li style="margin-bottom: 6px;">Vacuum carpeted areas and mop tiled areas</li>
+                <li style="margin-bottom: 6px;">Empty bins and remove perishables from the fridge</li>
+                <li style="margin-bottom: 6px;">Wipe down surfaces</li>
+                <li style="margin-bottom: 6px;">Clean the kitchen including unstacking the dishwasher and emptying the drying rack</li>
+              </ul>
+              <p style="margin-bottom: 0; color: #64748b; font-style: italic;">Please note, how you leave the apartment is how the next guests will find it.</p>
+            </div>
+            
+            <!-- General Section -->
+            <div style="background: #f0fdf4; border-left: 4px solid #22c55e; padding: 20px; margin: 25px 0; border-radius: 4px;">
+              <h2 style="margin-top: 0; color: #166534; font-size: 18px;">📶 General</h2>
+              <table style="width: 100%; border-collapse: collapse;">
+                <tr>
+                  <td style="padding: 6px 0; color: #166534; font-weight: 600; width: 120px;">Wifi Network:</td>
+                  <td style="padding: 6px 0; color: #15803d; font-weight: 500;">Winderie</td>
+                </tr>
+                <tr>
+                  <td style="padding: 6px 0; color: #166534; font-weight: 600;">Wifi Password:</td>
+                  <td style="padding: 6px 0; color: #15803d; font-weight: 500;">Rotella01</td>
+                </tr>
+              </table>
+              <p style="margin-top: 15px; margin-bottom: 0; color: #166534;"><strong>Supplies:</strong> If anything is running low (e.g. butter, toilet paper, cleaning products), please let us know so we can replace when we next visit.</p>
+            </div>
+            
+            <p style="font-size: 16px; color: #333;">If you have any questions please let us know, otherwise we hope you enjoy your stay!</p>
+            
+            <p style="font-size: 16px; color: #333; margin-bottom: 5px;">Regards,</p>
+            <p style="font-size: 16px; color: #333; margin-top: 0;"><strong>Jack and Nicole</strong></p>
+            
+            <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #e2e8f0;">
+              <p style="font-size: 14px; color: #64748b; margin: 5px 0;">
+                <strong>Jack:</strong> <a href="tel:0497162289" style="color: #3b82f6;">0497 162 289</a>
+              </p>
+              <p style="font-size: 14px; color: #64748b; margin: 5px 0;">
+                <strong>Nicole:</strong> <a href="tel:0431260688" style="color: #3b82f6;">0431 260 688</a>
+              </p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+    console.log(`Check-in reminder email sent to ${booking.guest_email}`);
+  } catch (error) {
+    console.error("Failed to send check-in reminder email:", error);
+    throw error;
+  }
+}
