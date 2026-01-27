@@ -45,7 +45,7 @@ NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_your_publishable_key_here
 STRIPE_SECRET_KEY=sk_test_your_secret_key_here
 STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret_here
 
-# Email Notifications (Resend)
+# Email Notifications (Resend) 
 RESEND_KEY=re_your_resend_api_key_here
 OWNER_EMAIL=your-email@example.com
 RESEND_FROM_EMAIL=The Loft @ Jindabyne <noreply@theloftatjindabyne.com.au>  # Optional: requires domain verification
