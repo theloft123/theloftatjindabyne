@@ -82,6 +82,7 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   const [isMobile, setIsMobile] = useState(false);
   const [isProcessingCheckout, setIsProcessingCheckout] = useState(false);
   const [blockedDateMessage, setBlockedDateMessage] = useState<string | null>(null);
+  const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
   // Store input values as strings to allow proper editing/backspace
   const [adultsInput, setAdultsInput] = useState("2");
   const [childrenInput, setChildrenInput] = useState("0");
@@ -418,7 +419,35 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
               classNames={CALENDAR_CLASS_NAMES}
               modifiers={modifiers}
               modifiersClassNames={modifiersClassNames}
+              onDayMouseEnter={(date) => setHoveredDate(date)}
+              onDayMouseLeave={() => setHoveredDate(null)}
             />
+            {/* Tooltip for hovered date availability */}
+            {hoveredDate && (() => {
+              const availability = getDateAvailability(hoveredDate);
+              const todayStr = format(startOfToday(), "yyyy-MM-dd");
+              const hoveredStr = format(hoveredDate, "yyyy-MM-dd");
+              const isPast = hoveredStr < todayStr;
+              
+              let tooltipText = "";
+              if (!isPast && !availability.isAdminBlocked) {
+                if (availability.isCheckoutDate && !availability.isOccupied) {
+                  tooltipText = `Check-in available – guest checks out ${availability.checkOutDate}`;
+                } else if (availability.isCheckInDate && !availability.isOccupied) {
+                  tooltipText = `Check-out available – guest checks in ${availability.checkInDate}`;
+                } else if (availability.isOccupied) {
+                  tooltipText = `Booked: ${availability.checkInDate} – ${availability.checkOutDate}`;
+                }
+              }
+              
+              if (!tooltipText) return null;
+              
+              return (
+                <div className="mt-2 text-center text-sm text-slate-600 bg-slate-100 rounded-lg px-3 py-2">
+                  <span className="font-medium">{format(hoveredDate, "EEE d MMM")}:</span> {tooltipText}
+                </div>
+              );
+            })()}
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">
             {breakdown && !hasConflict ? (
