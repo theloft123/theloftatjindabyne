@@ -105,21 +105,25 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   }, []);
 
   // Check if selected range overlaps with booked dates
+  // Uses exclusive checkout comparison to allow same-day turnover
   const hasConflict = useMemo(() => {
     if (!range?.from || !range?.to) return false;
     
-    const selectedDates = eachDayOfInterval({
-      start: range.from,
-      end: addDays(range.to, -1),
-    });
+    // Normalize dates to YYYY-MM-DD strings for comparison to avoid timezone issues
+    const selectedCheckIn = format(range.from, "yyyy-MM-dd");
+    const selectedCheckOut = format(range.to, "yyyy-MM-dd");
 
-    return selectedDates.some(date => {
-      return reservations.some((res) => {
-        if (res.status !== "confirmed" && res.status !== "pending") return false;
-        const checkIn = new Date(res.check_in_date);
-        const checkOut = new Date(res.check_out_date);
-        return date >= checkIn && date < checkOut;
-      });
+    return reservations.some((res) => {
+      if (res.status !== "confirmed" && res.status !== "pending") return false;
+      
+      // Same-day turnover is allowed:
+      // - New check-in can be on existing checkout day (selectedCheckIn >= res.check_out_date is OK)
+      // - New checkout can be on existing check-in day (selectedCheckOut <= res.check_in_date is OK)
+      // Conflict occurs when: selectedCheckIn < res.check_out_date AND selectedCheckOut > res.check_in_date
+      return (
+        selectedCheckIn < res.check_out_date &&
+        selectedCheckOut > res.check_in_date
+      );
     });
   }, [range, reservations]);
 
@@ -224,6 +228,9 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
       (res) => res.status === "confirmed" || res.status === "pending"
     );
 
+    // Normalize to YYYY-MM-DD for comparison to avoid timezone issues
+    const dayStr = format(day, "yyyy-MM-dd");
+
     let isCheckoutDate = false;
     let isCheckInDate = false;
     let isOccupied = false;
@@ -232,36 +239,32 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
     let checkOutDate: string | undefined;
 
     for (const res of activeReservations) {
-      const resCheckIn = new Date(res.check_in_date);
-      const resCheckOut = new Date(res.check_out_date);
-
       // Check if this is someone's checkout date (available for new check-in)
-      if (isSameDay(day, resCheckOut)) {
+      if (dayStr === res.check_out_date) {
         isCheckoutDate = true;
-        checkOutDate = format(resCheckOut, "MMM d");
+        checkOutDate = format(parseISO(res.check_out_date), "MMM d");
         guestName = res.guest_name;
       }
 
       // Check if this is someone's check-in date (available for new checkout)
-      if (isSameDay(day, resCheckIn)) {
+      if (dayStr === res.check_in_date) {
         isCheckInDate = true;
-        checkInDate = format(resCheckIn, "MMM d");
+        checkInDate = format(parseISO(res.check_in_date), "MMM d");
         guestName = res.guest_name;
       }
 
-      // Check if this night is occupied (between check-in and checkout)
-      if (day >= resCheckIn && day < resCheckOut) {
+      // Check if this night is occupied (between check-in inclusive and checkout exclusive)
+      // A night is occupied if: check_in_date <= day < check_out_date
+      if (dayStr >= res.check_in_date && dayStr < res.check_out_date) {
         isOccupied = true;
-        checkInDate = format(resCheckIn, "MMM d");
-        checkOutDate = format(resCheckOut, "MMM d");
+        checkInDate = format(parseISO(res.check_in_date), "MMM d");
+        checkOutDate = format(parseISO(res.check_out_date), "MMM d");
         guestName = res.guest_name;
       }
     }
 
     const isAdminBlocked = bookings.blockedDates.some((blocked) => {
-      const start = new Date(blocked.start);
-      const end = new Date(blocked.end);
-      return day >= start && day <= end;
+      return dayStr >= blocked.start && dayStr <= blocked.end;
     });
 
     return { isCheckoutDate, isCheckInDate, isOccupied, isAdminBlocked, guestName, checkInDate, checkOutDate };
@@ -270,22 +273,23 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   // Dynamic disabled function that considers selection state
   const isDateDisabled = useCallback((day: Date): boolean => {
     const today = startOfToday();
+    const dayStr = format(day, "yyyy-MM-dd");
+    const todayStr = format(today, "yyyy-MM-dd");
     
     // Past dates are always disabled
-    if (day < today) return true;
+    if (dayStr < todayStr) return true;
 
     // Max advance booking check
     const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
     if (maxAdvanceMonths) {
       const maxBookingDate = addMonths(today, maxAdvanceMonths);
-      if (day > maxBookingDate) return true;
+      const maxStr = format(maxBookingDate, "yyyy-MM-dd");
+      if (dayStr > maxStr) return true;
     }
 
     // Admin blocked dates
     const isAdminBlocked = bookings.blockedDates.some((blocked) => {
-      const start = new Date(blocked.start);
-      const end = new Date(blocked.end);
-      return day >= start && day <= end;
+      return dayStr >= blocked.start && dayStr <= blocked.end;
     });
     if (isAdminBlocked) return true;
 
@@ -294,37 +298,24 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
 
     // If user hasn't selected a start date yet (selecting check-in)
     if (!range?.from) {
+      // Can check IN on a checkout date (someone leaving that day) - it's not occupied
+      // Checkout dates are NOT occupied nights (guest leaves that morning)
+      if (availability.isCheckoutDate) {
+        return false;
+      }
       // Can't check IN on an occupied night
-      // But CAN check in on a checkout date (someone leaving that day)
-      if (availability.isOccupied && !availability.isCheckoutDate) {
-        return true;
-      }
-      // If it's ONLY a checkout date (not also occupied from another booking), it's available
-      if (availability.isCheckoutDate && !availability.isOccupied) {
-        return false;
-      }
-      // If occupied but also checkout date, only allow if it's exactly the checkout
-      if (availability.isOccupied && availability.isCheckoutDate) {
-        // Check if this specific day is the last night of occupation
-        // Actually, checkout dates are never "occupied" - the guest leaves that day
-        return false;
-      }
       if (availability.isOccupied) {
         return true;
       }
     } else {
       // User has selected a start date (now selecting check-out)
-      // Can't check OUT after someone else has checked in during your stay
-      // But CAN check out on a check-in date (someone arriving that day)
-      
-      // If this is an occupied night that's not a check-in date, disable it
-      // unless it's the day before (your last night would overlap)
-      if (availability.isOccupied && !availability.isCheckInDate) {
-        return true;
-      }
-      // Check-in dates are available as checkout destinations
+      // Can check OUT on a check-in date (someone arriving that day)
       if (availability.isCheckInDate) {
         return false;
+      }
+      // Can't select occupied nights as checkout
+      if (availability.isOccupied) {
+        return true;
       }
     }
 
@@ -342,13 +333,14 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
     );
 
     for (const res of activeReservations) {
-      const checkIn = new Date(res.check_in_date);
-      const checkOut = new Date(res.check_out_date);
+      // Parse dates using parseISO to ensure correct timezone handling
+      const checkIn = parseISO(res.check_in_date);
+      const checkOut = parseISO(res.check_out_date);
       
       checkinDates.push(checkIn);
       checkoutDates.push(checkOut);
       
-      // Add all occupied nights
+      // Add all occupied nights (check-in to day before checkout)
       const nights = eachDayOfInterval({
         start: checkIn,
         end: addDays(checkOut, -1),
