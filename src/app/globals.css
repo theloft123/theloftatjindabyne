@@ -109,3 +109,22 @@ a {
     flex-direction: column !important;
   }
 }
+
+/* Turnover date styling */
+.rdp-day_checkout_available:not(.rdp-day_disabled) {
+  background-color: #dcfce7 !important;
+}
+
+.rdp-day_checkin_available:not(.rdp-day_disabled) {
+  background-color: #dbeafe !important;
+}
+
+/* Calendar cell relative positioning for tooltips */
+.rdp-cell {
+  overflow: visible !important;
+}
+
+/* Tooltip z-index fix */
+.rdp-day + div {
+  z-index: 100;
+}

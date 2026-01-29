@@ -10,9 +10,10 @@ import {
   getDay,
   isWithinInterval,
   parseISO,
+  isSameDay,
 } from "date-fns";
-import { useMemo, useState, useEffect } from "react";
-import { DateRange, DayPicker } from "react-day-picker";
+import { useMemo, useState, useEffect, useCallback } from "react";
+import { DateRange, DayPicker, DayProps } from "react-day-picker";
 import { useAccess } from "@/context/AccessContext";
 import type { SiteContent } from "@/lib/siteContent";
 
@@ -40,6 +41,17 @@ const CALENDAR_CLASS_NAMES = {
   day_range_middle: "bg-sky-100 text-slate-900 hover:bg-sky-200",
   day_disabled: "cursor-not-allowed bg-red-200 text-red-700 line-through decoration-2 decoration-red-600 font-bold hover:bg-red-300 [&:not(.rdp-day_outside)]:opacity-100",
 } as const;
+
+// Date availability types for tooltips
+type DateAvailability = {
+  isCheckoutDate: boolean; // Someone checking out - available for new check-in
+  isCheckInDate: boolean; // Someone checking in - available for new checkout
+  isOccupied: boolean; // Night is occupied
+  isAdminBlocked: boolean;
+  guestName?: string;
+  checkInDate?: string;
+  checkOutDate?: string;
+};
 
 type StayBreakdown = {
   nights: number;
@@ -206,39 +218,156 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
     } satisfies StayBreakdown;
   }, [bookings, range, guestDetails.adults, guestDetails.childrenUnder12]);
 
-  const disabledDays = useMemo(() => {
-    // Manual blocked dates
-    const blocked = bookings.blockedDates.map(({ start, end }) => ({
-      from: new Date(start),
-      to: new Date(end),
-    }));
+  // Get date availability info for a specific date
+  const getDateAvailability = useCallback((day: Date): DateAvailability => {
+    const activeReservations = reservations.filter(
+      (res) => res.status === "confirmed" || res.status === "pending"
+    );
 
-    // Blocked dates from confirmed reservations
-    const reservationBlocked = reservations
-      .filter((res) => res.status === "confirmed" || res.status === "pending")
-      .map((res) => ({
-        from: new Date(res.check_in_date),
-        to: addDays(new Date(res.check_out_date), -1),
-      }));
+    let isCheckoutDate = false;
+    let isCheckInDate = false;
+    let isOccupied = false;
+    let guestName: string | undefined;
+    let checkInDate: string | undefined;
+    let checkOutDate: string | undefined;
 
-    // Calculate max advance booking cutoff date
-    const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
+    for (const res of activeReservations) {
+      const resCheckIn = new Date(res.check_in_date);
+      const resCheckOut = new Date(res.check_out_date);
+
+      // Check if this is someone's checkout date (available for new check-in)
+      if (isSameDay(day, resCheckOut)) {
+        isCheckoutDate = true;
+        checkOutDate = format(resCheckOut, "MMM d");
+        guestName = res.guest_name;
+      }
+
+      // Check if this is someone's check-in date (available for new checkout)
+      if (isSameDay(day, resCheckIn)) {
+        isCheckInDate = true;
+        checkInDate = format(resCheckIn, "MMM d");
+        guestName = res.guest_name;
+      }
+
+      // Check if this night is occupied (between check-in and checkout)
+      if (day >= resCheckIn && day < resCheckOut) {
+        isOccupied = true;
+        checkInDate = format(resCheckIn, "MMM d");
+        checkOutDate = format(resCheckOut, "MMM d");
+        guestName = res.guest_name;
+      }
+    }
+
+    const isAdminBlocked = bookings.blockedDates.some((blocked) => {
+      const start = new Date(blocked.start);
+      const end = new Date(blocked.end);
+      return day >= start && day <= end;
+    });
+
+    return { isCheckoutDate, isCheckInDate, isOccupied, isAdminBlocked, guestName, checkInDate, checkOutDate };
+  }, [reservations, bookings.blockedDates]);
+
+  // Dynamic disabled function that considers selection state
+  const isDateDisabled = useCallback((day: Date): boolean => {
     const today = startOfToday();
-    const maxBookingDate = maxAdvanceMonths 
-      ? addMonths(today, maxAdvanceMonths)
-      : null;
+    
+    // Past dates are always disabled
+    if (day < today) return true;
 
-    // Build the disabled list - past dates and blocked ranges
-    const disabledList = [
-      { before: today },
-      ...blocked,
-      ...reservationBlocked,
-      // Add max advance booking restriction if set
-      ...(maxBookingDate ? [{ after: maxBookingDate }] : []),
-    ];
+    // Max advance booking check
+    const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
+    if (maxAdvanceMonths) {
+      const maxBookingDate = addMonths(today, maxAdvanceMonths);
+      if (day > maxBookingDate) return true;
+    }
 
-    return disabledList;
-  }, [bookings.blockedDates, bookings.maxAdvanceBookingMonths, reservations]);
+    // Admin blocked dates
+    const isAdminBlocked = bookings.blockedDates.some((blocked) => {
+      const start = new Date(blocked.start);
+      const end = new Date(blocked.end);
+      return day >= start && day <= end;
+    });
+    if (isAdminBlocked) return true;
+
+    // Get availability info
+    const availability = getDateAvailability(day);
+
+    // If user hasn't selected a start date yet (selecting check-in)
+    if (!range?.from) {
+      // Can't check IN on an occupied night
+      // But CAN check in on a checkout date (someone leaving that day)
+      if (availability.isOccupied && !availability.isCheckoutDate) {
+        return true;
+      }
+      // If it's ONLY a checkout date (not also occupied from another booking), it's available
+      if (availability.isCheckoutDate && !availability.isOccupied) {
+        return false;
+      }
+      // If occupied but also checkout date, only allow if it's exactly the checkout
+      if (availability.isOccupied && availability.isCheckoutDate) {
+        // Check if this specific day is the last night of occupation
+        // Actually, checkout dates are never "occupied" - the guest leaves that day
+        return false;
+      }
+      if (availability.isOccupied) {
+        return true;
+      }
+    } else {
+      // User has selected a start date (now selecting check-out)
+      // Can't check OUT after someone else has checked in during your stay
+      // But CAN check out on a check-in date (someone arriving that day)
+      
+      // If this is an occupied night that's not a check-in date, disable it
+      // unless it's the day before (your last night would overlap)
+      if (availability.isOccupied && !availability.isCheckInDate) {
+        return true;
+      }
+      // Check-in dates are available as checkout destinations
+      if (availability.isCheckInDate) {
+        return false;
+      }
+    }
+
+    return false;
+  }, [range?.from, bookings.blockedDates, bookings.maxAdvanceBookingMonths, getDateAvailability]);
+
+  // Modifiers for special date styling
+  const modifiers = useMemo(() => {
+    const checkoutDates: Date[] = [];
+    const checkinDates: Date[] = [];
+    const occupiedDates: Date[] = [];
+
+    const activeReservations = reservations.filter(
+      (res) => res.status === "confirmed" || res.status === "pending"
+    );
+
+    for (const res of activeReservations) {
+      const checkIn = new Date(res.check_in_date);
+      const checkOut = new Date(res.check_out_date);
+      
+      checkinDates.push(checkIn);
+      checkoutDates.push(checkOut);
+      
+      // Add all occupied nights
+      const nights = eachDayOfInterval({
+        start: checkIn,
+        end: addDays(checkOut, -1),
+      });
+      occupiedDates.push(...nights);
+    }
+
+    return {
+      checkoutAvailable: checkoutDates,
+      checkinAvailable: checkinDates,
+      occupied: occupiedDates,
+    };
+  }, [reservations]);
+
+  const modifiersClassNames = useMemo(() => ({
+    checkoutAvailable: "rdp-day_checkout_available",
+    checkinAvailable: "rdp-day_checkin_available", 
+    occupied: "rdp-day_occupied",
+  }), []);
 
   return (
     <section
@@ -292,59 +421,103 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
                   setBlockedDateMessage(null);
                 }
               }}
-              disabled={disabledDays}
+              disabled={isDateDisabled}
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
               weekStartsOn={1}
               classNames={CALENDAR_CLASS_NAMES}
-                onDayClick={(day, modifiers) => {
-                if (modifiers.disabled) {
-                  // Check if it's a past date
+              components={{
+                Day: (props: DayProps) => {
+                  const { date, displayMonth } = props;
+                  const isOutside = date.getMonth() !== displayMonth.getMonth();
+                  const availability = getDateAvailability(date);
+                  const disabled = isDateDisabled(date);
                   const today = startOfToday();
-                  if (day < today) {
-                    alert("⚠️ Cannot book past dates.\n\nPlease select a date from today onwards.");
-                    return;
-                  }
-
-                  // Check if it's beyond the max advance booking limit
-                  const maxAdvanceMonths = bookings.maxAdvanceBookingMonths;
-                  if (maxAdvanceMonths) {
-                    const maxBookingDate = addMonths(today, maxAdvanceMonths);
-                    if (day > maxBookingDate) {
-                      const limitDate = format(maxBookingDate, "MMMM d, yyyy");
-                      alert(`⚠️ Cannot book this far in advance.\n\nBookings are currently limited to ${maxAdvanceMonths} months ahead.\n\nThe latest available date is ${limitDate}.`);
-                      setBlockedDateMessage(`Bookings are limited to ${maxAdvanceMonths} months in advance.`);
-                      return;
-                    }
-                  }
-
-                  // Check if it's a reservation
-                  const conflictingReservation = reservations.find((res) => {
-                    if (res.status !== "confirmed" && res.status !== "pending") return false;
-                    const checkIn = new Date(res.check_in_date);
-                    const checkOut = new Date(res.check_out_date);
-                    return day >= checkIn && day < checkOut;
-                  });
+                  const isPast = date < today;
                   
-                  if (conflictingReservation) {
-                    const checkIn = format(new Date(conflictingReservation.check_in_date), "MMM d, yyyy");
-                    const checkOut = format(new Date(conflictingReservation.check_out_date), "MMM d, yyyy");
-                    alert(`⚠️ This date is already booked!\n\nAnother guest has a reservation from ${checkIn} to ${checkOut}.\n\nPlease choose different dates.`);
-                    setBlockedDateMessage("This date is unavailable - already booked by another guest.");
-                  } else {
-                    // Check if it's an admin-blocked date
-                    const isAdminBlocked = bookings.blockedDates.some((blocked) => {
-                      const start = new Date(blocked.start);
-                      const end = new Date(blocked.end);
-                      return day >= start && day <= end;
-                    });
-
-                    if (isAdminBlocked) {
-                      alert("⚠️ This date is not available for booking.\n\nThe property owner has blocked this period.\n\nPlease choose different dates.");
-                    } else {
-                      alert("⚠️ This date is not available for booking.\n\nPlease choose different dates.");
+                  // Determine tooltip text
+                  let tooltipText = "";
+                  if (!isPast && !availability.isAdminBlocked) {
+                    if (availability.isCheckoutDate && !availability.isOccupied) {
+                      tooltipText = `Check-in available (guest checks out ${availability.checkOutDate})`;
+                    } else if (availability.isCheckInDate && !disabled) {
+                      tooltipText = `Check-out available (guest checks in ${availability.checkInDate})`;
+                    } else if (availability.isOccupied) {
+                      tooltipText = `Booked ${availability.checkInDate} - ${availability.checkOutDate}`;
                     }
-                    setBlockedDateMessage("This date is not available for booking.");
                   }
-                }
+                  
+                  // Check if date is in selected range
+                  const isRangeStart = range?.from && isSameDay(date, range.from);
+                  const isRangeEnd = range?.to && isSameDay(date, range.to);
+                  const isInRange = range?.from && range?.to && date > range.from && date < range.to;
+                  const isToday = isSameDay(date, today);
+                  
+                  // Build class names
+                  let className = CALENDAR_CLASS_NAMES.day;
+                  if (isOutside) className += " " + CALENDAR_CLASS_NAMES.day_outside;
+                  if (isToday) className += " " + CALENDAR_CLASS_NAMES.day_today;
+                  if (disabled) className += " " + CALENDAR_CLASS_NAMES.day_disabled;
+                  if (isRangeStart) className += " " + CALENDAR_CLASS_NAMES.day_range_start;
+                  if (isRangeEnd) className += " " + CALENDAR_CLASS_NAMES.day_range_end;
+                  if (isInRange) className += " " + CALENDAR_CLASS_NAMES.day_range_middle;
+                  
+                  // Add turnover styling for checkout/checkin dates
+                  if (!disabled && availability.isCheckoutDate && !availability.isOccupied) {
+                    className += " ring-2 ring-green-400 ring-inset";
+                  }
+                  if (!disabled && availability.isCheckInDate && range?.from) {
+                    className += " ring-2 ring-blue-400 ring-inset";
+                  }
+
+                  return (
+                    <div className="relative group">
+                      <button
+                        type="button"
+                        className={className}
+                        disabled={disabled}
+                        onClick={() => {
+                          if (disabled) {
+                            // Show appropriate message
+                            if (isPast) {
+                              alert("⚠️ Cannot book past dates.\n\nPlease select a date from today onwards.");
+                            } else if (availability.isAdminBlocked) {
+                              alert("⚠️ This date is not available for booking.\n\nThe property owner has blocked this period.");
+                            } else if (availability.isOccupied) {
+                              alert(`⚠️ This date is already booked!\n\nBooking: ${availability.checkInDate} - ${availability.checkOutDate}`);
+                            }
+                            return;
+                          }
+                          
+                          // Handle selection
+                          if (!range?.from) {
+                            setRange({ from: date, to: undefined });
+                          } else if (!range.to) {
+                            if (date < range.from) {
+                              setRange({ from: date, to: undefined });
+                            } else {
+                              setRange({ from: range.from, to: date });
+                            }
+                          } else {
+                            setRange({ from: date, to: undefined });
+                          }
+                          
+                          if (blockedDateMessage) {
+                            setBlockedDateMessage(null);
+                          }
+                        }}
+                      >
+                        {date.getDate()}
+                      </button>
+                      {tooltipText && !isOutside && (
+                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-slate-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                          {tooltipText}
+                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
+                        </div>
+                      )}
+                    </div>
+                  );
+                },
               }}
             />
           </div>
