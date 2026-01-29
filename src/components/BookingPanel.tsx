@@ -13,7 +13,7 @@ import {
   isSameDay,
 } from "date-fns";
 import { useMemo, useState, useEffect, useCallback } from "react";
-import { DateRange, DayPicker, DayProps } from "react-day-picker";
+import { DateRange, DayPicker } from "react-day-picker";
 import { useAccess } from "@/context/AccessContext";
 import type { SiteContent } from "@/lib/siteContent";
 
@@ -414,104 +414,10 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
                 }
               }}
               disabled={isDateDisabled}
-              modifiers={modifiers}
-              modifiersClassNames={modifiersClassNames}
               weekStartsOn={1}
               classNames={CALENDAR_CLASS_NAMES}
-              components={{
-                Day: (props: DayProps) => {
-                  const { day, modifiers } = props;
-                  const date = day.date;
-                  const isOutside = day.outside;
-                  const availability = getDateAvailability(date);
-                  const disabled = isDateDisabled(date);
-                  const today = startOfToday();
-                  const isPast = date < today;
-                  
-                  // Determine tooltip text
-                  let tooltipText = "";
-                  if (!isPast && !availability.isAdminBlocked) {
-                    if (availability.isCheckoutDate && !availability.isOccupied) {
-                      tooltipText = `Check-in available (guest checks out ${availability.checkOutDate})`;
-                    } else if (availability.isCheckInDate && !disabled) {
-                      tooltipText = `Check-out available (guest checks in ${availability.checkInDate})`;
-                    } else if (availability.isOccupied) {
-                      tooltipText = `Booked ${availability.checkInDate} - ${availability.checkOutDate}`;
-                    }
-                  }
-                  
-                  // Check if date is in selected range
-                  const isRangeStart = range?.from && isSameDay(date, range.from);
-                  const isRangeEnd = range?.to && isSameDay(date, range.to);
-                  const isInRange = range?.from && range?.to && date > range.from && date < range.to;
-                  const isToday = isSameDay(date, today);
-                  
-                  // Build class names
-                  let className = CALENDAR_CLASS_NAMES.day;
-                  if (isOutside) className += " " + CALENDAR_CLASS_NAMES.day_outside;
-                  if (isToday) className += " " + CALENDAR_CLASS_NAMES.day_today;
-                  if (disabled) className += " " + CALENDAR_CLASS_NAMES.day_disabled;
-                  if (isRangeStart) className += " " + CALENDAR_CLASS_NAMES.day_range_start;
-                  if (isRangeEnd) className += " " + CALENDAR_CLASS_NAMES.day_range_end;
-                  if (isInRange) className += " " + CALENDAR_CLASS_NAMES.day_range_middle;
-                  
-                  // Add turnover styling for checkout/checkin dates
-                  if (!disabled && availability.isCheckoutDate && !availability.isOccupied) {
-                    className += " ring-2 ring-green-400 ring-inset";
-                  }
-                  if (!disabled && availability.isCheckInDate && range?.from) {
-                    className += " ring-2 ring-blue-400 ring-inset";
-                  }
-
-                  return (
-                    <div className="relative group">
-                      <button
-                        type="button"
-                        className={className}
-                        disabled={disabled}
-                        onClick={() => {
-                          if (disabled) {
-                            // Show appropriate message
-                            if (isPast) {
-                              alert("⚠️ Cannot book past dates.\n\nPlease select a date from today onwards.");
-                            } else if (availability.isAdminBlocked) {
-                              alert("⚠️ This date is not available for booking.\n\nThe property owner has blocked this period.");
-                            } else if (availability.isOccupied) {
-                              alert(`⚠️ This date is already booked!\n\nBooking: ${availability.checkInDate} - ${availability.checkOutDate}`);
-                            }
-                            return;
-                          }
-                          
-                          // Handle selection
-                          if (!range?.from) {
-                            setRange({ from: date, to: undefined });
-                          } else if (!range.to) {
-                            if (date < range.from) {
-                              setRange({ from: date, to: undefined });
-                            } else {
-                              setRange({ from: range.from, to: date });
-                            }
-                          } else {
-                            setRange({ from: date, to: undefined });
-                          }
-                          
-                          if (blockedDateMessage) {
-                            setBlockedDateMessage(null);
-                          }
-                        }}
-                      >
-                        {date.getDate()}
-                      </button>
-                      {tooltipText && !isOutside && (
-                        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 text-xs text-white bg-slate-800 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-                          {tooltipText}
-                          <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-800" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                },
-              }}
+              modifiers={modifiers}
+              modifiersClassNames={modifiersClassNames}
             />
           </div>
           <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">

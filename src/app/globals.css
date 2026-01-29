@@ -110,21 +110,35 @@ a {
   }
 }
 
-/* Turnover date styling */
-.rdp-day_checkout_available:not(.rdp-day_disabled) {
-  background-color: #dcfce7 !important;
+/* Turnover date styling - subtle indicators for same-day turnover dates */
+.rdp-day_checkout_available:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_range_start):not(.rdp-day_range_end):not(.rdp-day_range_middle) {
+  position: relative;
 }
 
-.rdp-day_checkin_available:not(.rdp-day_disabled) {
-  background-color: #dbeafe !important;
+.rdp-day_checkout_available:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_range_start):not(.rdp-day_range_end):not(.rdp-day_range_middle)::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #94a3b8; /* slate-400 */
 }
 
-/* Calendar cell relative positioning for tooltips */
-.rdp-cell {
-  overflow: visible !important;
+.rdp-day_checkin_available:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_range_start):not(.rdp-day_range_end):not(.rdp-day_range_middle) {
+  position: relative;
 }
 
-/* Tooltip z-index fix */
-.rdp-day + div {
-  z-index: 100;
+.rdp-day_checkin_available:not(.rdp-day_disabled):not(.rdp-day_selected):not(.rdp-day_range_start):not(.rdp-day_range_end):not(.rdp-day_range_middle)::after {
+  content: "";
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background-color: #94a3b8; /* slate-400 */
 }
