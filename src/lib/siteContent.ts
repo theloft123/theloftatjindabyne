@@ -23,6 +23,18 @@ export type SiteContent = {
     }>;
     amenities: string[];
   };
+  termsAndRules?: {
+    whoCanBook: string;
+    houseRules: string[];
+    cancellationPolicy: string;
+    loftSpace: string;
+    linenInfo: string;
+    beddingConfig: string[];
+    skiGear: string;
+    bbq: string;
+    cleaningInfo: string;
+    cleaningChecklist: string[];
+  };
   bookings: {
     blockedDates: Array<{ start: string; end: string; note?: string }>;
     weekdayRate: number;
@@ -190,6 +202,34 @@ const defaultContent: SiteContent = {
       "Loft access via steep ladder",
     ],
   },
+  termsAndRules: {
+    whoCanBook: "The Loft @ Jindabyne is available to the host's friends and family. A coupon code will be provided to unlock accommodation availability. The hosts reserve the right to cancel any bookings.",
+    houseRules: [
+      "Check-in: after 1:00 pm",
+      "Check-out: 11:00 am",
+      "Self check-in with door code (provided prior to check-in)",
+      "No smoking, no pets, no parties or events",
+    ],
+    cancellationPolicy: "Guests can cancel until 14 days before check-in for a full refund.",
+    loftSpace: "Access to the loft is via a ladder; we recommend descending backwards and keeping hold of the steps for balance. Because of the steepness of the ladder, we don't recommend younger kids stay upstairs.",
+    linenInfo: "Please bring your own linen including sheets, pillow cases and towels. Doonas, pillows and blankets are provided and are on the beds.",
+    beddingConfig: [
+      "Bedroom 1: Queen",
+      "Bedroom 2 (Bunk Room): 1 x Double and 3 x Singles",
+      "Loft front: Queen",
+      "Loft back: 2 x Singles",
+    ],
+    skiGear: "We have a growing collection of kids ski gear which you are welcome to use. It is located in the hallway cupboard. Please ensure any ski gear borrowed is washed, dry and put away ready for the next guests.\n\nThere are also 5 toboggans in the storeroom for snow play.\n\nWe ask that you not use any of the adult ski gear or skis located throughout the apartment.",
+    bbq: "There is a BBQ located around the back of apartment. Walk around the right hand side of the building, and you will see it in the carport on the right hand side. There is a battery operated light above the BBQ. If the gas is running low, please let us know and we will refill when we are next there.",
+    cleaningInfo: "Please give the place a clean before you leave. Cleaning products can be found under the kitchen sink and in the hallway cupboard:",
+    cleaningChecklist: [
+      "Clean the main bathroom and toilet upstairs",
+      "Vacuum all carpeted areas and mop all tiled areas",
+      "Empty all bins and remove perishables from the fridge",
+      "Wipe down all surfaces",
+      "Clean the kitchen including unstacking the dishwasher and emptying the drying rack",
+    ],
+  },
   bookings: {
     blockedDates: [],
     weekdayRate: 520,
@@ -209,9 +249,9 @@ const defaultContent: SiteContent = {
     panelText: {
       eyebrow: "Availability & Pricing",
       heading: "Plan your stay",
-      description: "Select your arrival and departure dates to view the current rate. Weekends attract a premium, while longer mid-week stays are rewarded with our best nightly pricing.",
-      detail1: "Self check-in from 3:00pm, check-out by 10:00am",
-      detail2: "Rates include all linen, cleaning fee, and local taxes",
+      description: "Select your arrival and departure dates to view the current availability and rate.",
+      detail1: "",
+      detail2: "",
     },
     maxAdvanceBookingMonths: 9,
   },

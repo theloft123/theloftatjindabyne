@@ -41,17 +41,17 @@ export async function checkDateAvailability(
     if (!activeStatuses.includes(reservation.status)) {
       return false;
     }
-    // Check if dates overlap
+    // Check if dates overlap (checkout dates are exclusive - same-day turnover allowed)
     return (
-      reservation.check_in_date <= checkOut &&
-      reservation.check_out_date >= checkIn
+      reservation.check_in_date < checkOut &&
+      reservation.check_out_date > checkIn
     );
   });
 
-  // Also check manually blocked dates from admin panel
+  // Also check manually blocked dates from admin panel (blocked dates are inclusive)
   const hasBlockedDateConflict = content.bookings.blockedDates.some((blocked) => {
     return (
-      blocked.start <= checkOut &&
+      blocked.start < checkOut &&
       blocked.end >= checkIn
     );
   });

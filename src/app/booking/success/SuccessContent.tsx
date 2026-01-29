@@ -155,8 +155,8 @@ export function SuccessContent() {
             </h3>
             <ul className="mt-3 space-y-2 text-sm text-blue-800">
               <li>• Check your email for confirmation and booking details</li>
-              <li>• Self check-in instructions will be sent 24 hours before arrival</li>
-              <li>• Check-in from 3:00pm, check-out by 10:00am</li>
+              <li>• Self check-in instructions will be sent 7 days before arrival</li>
+              <li>• Check-in: after 1:00 pm, Check-out: 11:00 am</li>
             </ul>
           </div>
           {sessionData?.metadata?.bookingId && (

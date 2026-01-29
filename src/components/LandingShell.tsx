@@ -172,7 +172,7 @@ export function LandingShell() {
               <Hero hero={content.hero} details={content.details} />
               <PhotoGallery photos={content.gallery} />
               <PropertyDetails details={content.details} />
-              <TermsAndRules />
+              <TermsAndRules termsAndRules={content.termsAndRules} />
               <BookingPanel bookings={content.bookings} reservations={content.reservations} />
             </main>
             <footer className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-sm text-slate-500 shadow-sm">

@@ -80,10 +80,26 @@ export async function sendBookingConfirmationToGuest(
             <div style="margin: 30px 0; padding: 20px; background: #f8fafc; border-radius: 4px;">
               <h3 style="margin-top: 0; color: #1e293b; font-size: 18px;">Important Information</h3>
               <ul style="margin: 0; padding-left: 20px; color: #475569;">
-                <li style="margin-bottom: 8px;">Self check-in from 3:00pm</li>
-                <li style="margin-bottom: 8px;">Check-out by 10:00am</li>
-                <li style="margin-bottom: 8px;">All linen and cleaning fees are included</li>
+                <li style="margin-bottom: 8px;">Check-in: after 1:00 pm</li>
+                <li style="margin-bottom: 8px;">Check-out: 11:00 am</li>
               </ul>
+            </div>
+            
+            <div style="margin: 30px 0; padding: 20px; background: #fef3c7; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #92400e; font-size: 18px;">Linen & Bedding</h3>
+              <p style="color: #78350f; margin-bottom: 12px;">Please bring your own linen including sheets, pillow cases and towels. Doonas, pillows and blankets are provided and are on the beds.</p>
+              <p style="color: #92400e; font-weight: 600; margin-bottom: 8px;">Bedding Configuration:</p>
+              <ul style="margin: 0; padding-left: 20px; color: #78350f;">
+                <li style="margin-bottom: 4px;">Bedroom 1: Queen</li>
+                <li style="margin-bottom: 4px;">Bedroom 2 (Bunk Room): 1 x Double and 3 x Singles</li>
+                <li style="margin-bottom: 4px;">Loft front: Queen</li>
+                <li style="margin-bottom: 4px;">Loft back: 2 x Singles</li>
+              </ul>
+            </div>
+            
+            <div style="margin: 30px 0; padding: 20px; background: #fee2e2; border-radius: 4px;">
+              <h3 style="margin-top: 0; color: #991b1b; font-size: 18px;">Cleaning</h3>
+              <p style="color: #991b1b; margin: 0;">There is no cleaning included. Please give the place a clean before you leave. How you leave the apartment is how the next guests will find it.</p>
             </div>
             
             <div style="margin: 30px 0; padding: 20px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 4px;">

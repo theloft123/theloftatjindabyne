@@ -802,6 +802,213 @@ export function AdminPanel() {
         );
       })()}
 
+      {draft && (() => {
+        // Ensure termsAndRules exists with defaults
+        const currentTerms = draft.termsAndRules || {
+          whoCanBook: "The Loft @ Jindabyne is available to the host's friends and family. A coupon code will be provided to unlock accommodation availability. The hosts reserve the right to cancel any bookings.",
+          houseRules: [
+            "Check-in: after 1:00 pm",
+            "Check-out: 11:00 am",
+            "Self check-in with door code (provided prior to check-in)",
+            "No smoking, no pets, no parties or events",
+          ],
+          cancellationPolicy: "Guests can cancel until 14 days before check-in for a full refund.",
+          loftSpace: "Access to the loft is via a ladder; we recommend descending backwards and keeping hold of the steps for balance. Because of the steepness of the ladder, we don't recommend younger kids stay upstairs.",
+          linenInfo: "Please bring your own linen including sheets, pillow cases and towels. Doonas, pillows and blankets are provided and are on the beds.",
+          beddingConfig: [
+            "Bedroom 1: Queen",
+            "Bedroom 2 (Bunk Room): 1 x Double and 3 x Singles",
+            "Loft front: Queen",
+            "Loft back: 2 x Singles",
+          ],
+          skiGear: "We have a growing collection of kids ski gear which you are welcome to use. It is located in the hallway cupboard. Please ensure any ski gear borrowed is washed, dry and put away ready for the next guests.\n\nThere are also 5 toboggans in the storeroom for snow play.\n\nWe ask that you not use any of the adult ski gear or skis located throughout the apartment.",
+          bbq: "There is a BBQ located around the back of apartment. Walk around the right hand side of the building, and you will see it in the carport on the right hand side. There is a battery operated light above the BBQ. If the gas is running low, please let us know and we will refill when we are next there.",
+          cleaningInfo: "Please give the place a clean before you leave. Cleaning products can be found under the kitchen sink and in the hallway cupboard:",
+          cleaningChecklist: [
+            "Clean the main bathroom and toilet upstairs",
+            "Vacuum all carpeted areas and mop all tiled areas",
+            "Empty all bins and remove perishables from the fridge",
+            "Wipe down all surfaces",
+            "Clean the kitchen including unstacking the dishwasher and emptying the drying rack",
+          ],
+        };
+
+        return (
+          <section className={SECTION_CLASS}>
+            <h3 className="text-base font-semibold text-slate-900">Terms & House Rules</h3>
+            <p className="mt-2 text-sm text-slate-500">
+              Edit the content shown in the "Important Information, Terms & House Rules" section.
+            </p>
+            <div className="mt-4 space-y-4">
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Who can book?
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={3}
+                  value={currentTerms.whoCanBook}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      whoCanBook: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  House Rules
+                </label>
+                <p className="mt-1 text-xs text-slate-400">One rule per line</p>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={5}
+                  value={currentTerms.houseRules.join("\n")}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      houseRules: e.target.value.split("\n").filter(Boolean),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Cancellation Policy
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={2}
+                  value={currentTerms.cancellationPolicy}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      cancellationPolicy: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  The Loft Space
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={3}
+                  value={currentTerms.loftSpace}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      loftSpace: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Linen & Towels Info
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={2}
+                  value={currentTerms.linenInfo}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      linenInfo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Bedding Configuration
+                </label>
+                <p className="mt-1 text-xs text-slate-400">One bed configuration per line</p>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={5}
+                  value={currentTerms.beddingConfig.join("\n")}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      beddingConfig: e.target.value.split("\n").filter(Boolean),
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Ski Gear
+                </label>
+                <p className="mt-1 text-xs text-slate-400">Use blank lines to separate paragraphs. Last paragraph will be bold.</p>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={5}
+                  value={currentTerms.skiGear}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      skiGear: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  BBQ
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={3}
+                  value={currentTerms.bbq}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      bbq: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Cleaning Info
+                </label>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={2}
+                  value={currentTerms.cleaningInfo}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      cleaningInfo: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                  Cleaning Checklist
+                </label>
+                <p className="mt-1 text-xs text-slate-400">One item per line</p>
+                <textarea
+                  className="mt-2 w-full rounded-2xl border border-slate-200 px-4 py-3"
+                  rows={6}
+                  value={currentTerms.cleaningChecklist.join("\n")}
+                  onChange={(e) =>
+                    handleContentChange("termsAndRules", {
+                      ...currentTerms,
+                      cleaningChecklist: e.target.value.split("\n").filter(Boolean),
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </section>
+        );
+      })()}
+
       <div className={SECTION_CLASS}>
         <div className="flex flex-col gap-3">
           <h3 className="text-base font-semibold text-slate-900">Guest password</h3>

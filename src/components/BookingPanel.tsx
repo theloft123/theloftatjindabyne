@@ -78,9 +78,9 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
   const panelText = bookings.panelText || {
     eyebrow: "Availability & Pricing",
     heading: "Plan your stay",
-    description: "Select your arrival and departure dates to view the current rate. Weekends attract a premium, while longer mid-week stays are rewarded with our best nightly pricing.",
-    detail1: "Self check-in from 3:00pm, check-out by 10:00am",
-    detail2: "Rates include all linen, cleaning fee, and local taxes",
+    description: "Select your arrival and departure dates to view the current availability and rate.",
+    detail1: "",
+    detail2: "",
   };
 
   useEffect(() => {
@@ -258,8 +258,8 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
           </p>
           <ul className="mt-4 space-y-2 text-sm text-slate-600">
             <li>• Minimum stay of {bookings.minimumNights} nights</li>
-            {panelText.detail1 && <li>• {panelText.detail1}</li>}
-            {panelText.detail2 && <li>• {panelText.detail2}</li>}
+            {bookings.maximumNights && <li>• Maximum stay of {bookings.maximumNights} nights</li>}
+            <li>• No linen provided</li>
           </ul>
         </div>
         <div className="flex-1 space-y-6">
@@ -383,10 +383,6 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
                       </span>
                     </dt>
                     <dd>${breakdown.weekendNights * bookings.weekendRate}</dd>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <dt>Cleaning & preparation</dt>
-                    <dd>${breakdown.cleaningFee}</dd>
                   </div>
                   {breakdown.occupancyFee > 0 && (
                     <div className="flex items-center justify-between">
