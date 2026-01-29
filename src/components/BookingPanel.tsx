@@ -420,8 +420,9 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
               classNames={CALENDAR_CLASS_NAMES}
               components={{
                 Day: (props: DayProps) => {
-                  const { date, displayMonth } = props;
-                  const isOutside = date.getMonth() !== displayMonth.getMonth();
+                  const { day, modifiers } = props;
+                  const date = day.date;
+                  const isOutside = day.outside;
                   const availability = getDateAvailability(date);
                   const disabled = isDateDisabled(date);
                   const today = startOfToday();
