@@ -102,7 +102,7 @@ export function AccessGate({ children }: AccessGateProps) {
           </h1>
           <p className="text-sm text-slate-200">
             {mode === "guest"
-              ? "Enter the guest password provided in your booking confirmation to explore availability, pricing, and more."
+              ? "Enter the guest password provided by your hosts to explore availability, pricing, and make a booking."
               : "Admins can unlock editing tools to manage property content, bookings, and passwords."}
           </p>
         </div>
