@@ -57,6 +57,8 @@ type StayBreakdown = {
   nights: number;
   weekendNights: number;
   weekdayNights: number;
+  weekdayTotal: number;
+  weekendTotal: number;
   nightlyTotal: number;
   cleaningFee: number;
   occupancyFee: number;
@@ -152,9 +154,11 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
     let nightlyTotal = 0;
     let weekendNights = 0;
     let weekdayNights = 0;
+    let weekdayTotal = 0;
+    let weekendTotal = 0;
 
     for (const date of stayNights) {
-      const dayOfWeek = getDay(date); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+      const dayOfWeek = getDay(date);
       const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
       const dayName = dayNames[dayOfWeek] as keyof typeof bookings.dayOfWeekRates;
 
@@ -181,18 +185,17 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
       if (rateForNight === null) {
         if (isWeekend(date)) {
           rateForNight = bookings.weekendRate;
-          weekendNights++;
         } else {
           rateForNight = bookings.weekdayRate;
-          weekdayNights++;
         }
+      }
+
+      if (isWeekend(date)) {
+        weekendNights++;
+        weekendTotal += rateForNight;
       } else {
-        // Count as weekend or weekday for display purposes
-        if (isWeekend(date)) {
-          weekendNights++;
-        } else {
-          weekdayNights++;
-        }
+        weekdayNights++;
+        weekdayTotal += rateForNight;
       }
 
       nightlyTotal += rateForNight;
@@ -216,6 +219,8 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
       nights,
       weekendNights,
       weekdayNights,
+      weekdayTotal,
+      weekendTotal,
       nightlyTotal,
       cleaningFee: bookings.cleaningFee,
       occupancyFee,
@@ -467,24 +472,28 @@ export function BookingPanel({ bookings, reservations }: BookingPanelProps) {
                   </span>
                 </div>
                 <dl className="mt-6 space-y-3 text-sm">
+                  {breakdown.weekdayNights > 0 && (
                   <div className="flex items-center justify-between">
                     <dt>
                       Weeknight rate{" "}
                       <span className="text-slate-500">
-                        ({breakdown.weekdayNights} nights @ ${bookings.weekdayRate})
+                        ({breakdown.weekdayNights} nights @ ${Math.round(breakdown.weekdayTotal / breakdown.weekdayNights)})
                       </span>
                     </dt>
-                    <dd>${breakdown.weekdayNights * bookings.weekdayRate}</dd>
+                    <dd>${breakdown.weekdayTotal}</dd>
                   </div>
+                  )}
+                  {breakdown.weekendNights > 0 && (
                   <div className="flex items-center justify-between">
                     <dt>
                       Weekend rate{" "}
                       <span className="text-slate-500">
-                        ({breakdown.weekendNights} nights @ ${bookings.weekendRate})
+                        ({breakdown.weekendNights} nights @ ${Math.round(breakdown.weekendTotal / breakdown.weekendNights)})
                       </span>
                     </dt>
-                    <dd>${breakdown.weekendNights * bookings.weekendRate}</dd>
+                    <dd>${breakdown.weekendTotal}</dd>
                   </div>
+                  )}
                   {breakdown.occupancyFee > 0 && (
                     <div className="flex items-center justify-between">
                       <dt>
